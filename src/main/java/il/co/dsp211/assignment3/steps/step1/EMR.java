@@ -1,7 +1,7 @@
 package il.co.dsp211.assignment3.steps.step1;
 
-import il.co.dsp211.assignment2.steps.step1.jobs.*;
-import il.co.dsp211.assignment2.steps.utils.*;
+import il.co.dsp211.assignment3.steps.step1.jobs.*;
+import il.co.dsp211.assignment3.steps.utils.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.DoubleWritable;
