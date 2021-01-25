@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>il.co.dsp211.assignment3</groupId>
+	<artifactId>Semantic-Similarity-Classification-by-various-measures</artifactId>
+	<version>1.0-SNAPSHOT</version>
+
+	<properties>
+		<maven.compiler.source>8</maven.compiler.source>
+		<maven.compiler.target>8</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- Your exact Hadoop version here-->
+		<hadoop.version>3.2.1</hadoop.version>
+	</properties>
+
+	<developers>
+		<developer>
+			<id>ashr</id>
+			<name>Roy Ash</name>
+			<email>roy.ash456@gmail.com</email>
+			<url>https://www.linkedin.com/in/roy-ash-222351148</url>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>Asia/Jerusalem</timezone>
+			<properties>
+				<cellphone>+972546815181</cellphone>
+			</properties>
+		</developer>
+		<developer>
+			<name>Amit Binenfeld</name>
+			<email>amitbin20@gmail.com</email>
+			<url>https://www.linkedin.com/in/amit-binenfeld-09301a1b2</url>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>Asia/Jerusalem</timezone>
+		</developer>
+	</developers>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-client</artifactId>
+			<version>${hadoop.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.hadoop</groupId>
+			<artifactId>hadoop-aws</artifactId>
+			<version>${hadoop.version}</version>
+		</dependency>
+	</dependencies>
+</project>
