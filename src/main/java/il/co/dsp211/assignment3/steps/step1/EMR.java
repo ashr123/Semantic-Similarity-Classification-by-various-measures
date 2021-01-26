@@ -24,117 +24,69 @@ public class EMR
 		boolean jobStatus;
 		final Configuration conf = new Configuration();
 
-		System.out.println("Building job 1...");
+		System.out.println("Building job 1 - Corpus Word Count...");
 
 		Job job1 = Job.getInstance(conf);
-		job1.setJarByClass(Job1DivideCorpus.class);
+		job1.setJarByClass(CorpusWordCount.class);
 
 		job1.setInputFormatClass(SequenceFileInputFormat.class);
 		job1.setOutputFormatClass(SequenceFileOutputFormat.class);
 
-		job1.setMapperClass(Job1DivideCorpus.DividerMapper.class);
-		job1.setMapOutputKeyClass(Text.class);
-		job1.setMapOutputValueClass(BooleanLongPair.class);
+		job1.setMapperClass(CorpusWordCount.WordCounterMapper.class);
+		job1.setMapOutputKeyClass(StringDepLabelPair.class);
+		job1.setMapOutputValueClass(LongWritable.class);
 
-		job1.setCombinerClass(Job1DivideCorpus.CountCombiner.class);
+		job1.setCombinerClass(CorpusWordCount.PairSummerCombinerAndReducer.class);
 
-		job1.setReducerClass(Job1DivideCorpus.CountAndZipReducer.class);
-		job1.setOutputKeyClass(Text.class);
-		job1.setOutputValueClass(LongLongPair.class);
+		job1.setReducerClass(CorpusWordCount.PairSummerCombinerAndReducer.class);
+		job1.setOutputKeyClass(StringDepLabelPair.class);
+		job1.setOutputValueClass(LongWritable.class);
 
-		FileInputFormat.addInputPath(job1, new Path("s3://temp"));
-		FileOutputFormat.setOutputPath(job1, new Path(args[0] + "Step1Output"));
+		FileInputFormat.addInputPath(job1, new Path("s3://Google_Syntactic_N-Grams_URL)"));
+		FileOutputFormat.setOutputPath(job1, new Path(args[0] + "Step1Output-CorpusWordCount"));
 
 		System.out.println("Done building!\n" +
-		                   "Starting job 1...");
-		System.out.println("Job 1 completed with success status: " + (jobStatus = job1.waitForCompletion(true)) + "!");
+		                   "Starting job 1 - Corpus Word Count...");
+		System.out.println("Job 1 - Corpus Word Count: completed with success status: " + (jobStatus = job1.waitForCompletion(true)) + "!");
 
 		if (!jobStatus)
 			return;
 
 		//--------------------------------------------------------------------------------------------------------------
 
-		System.out.println("Building job 2...");
+		System.out.println("Building job 2 - CorpusPairFilter...");
 		Job job2 = Job.getInstance(conf);
-		job2.setJarByClass(Job2CalcT_rN_r.class);
+		job2.setJarByClass(CorpusPairFilter.class);
 
 		job2.setInputFormatClass(SequenceFileInputFormat.class);
 		job2.setOutputFormatClass(SequenceFileOutputFormat.class);
 
-		job2.setMapperClass(isWithCombiners ? Job2CalcT_rN_rWithCombiner.SplitRsMapper.class : Job2CalcT_rN_r.SplitRsMapper.class);
-		job2.setMapOutputKeyClass(BooleanLongPair.class);
-		job2.setMapOutputValueClass(isWithCombiners ? LongLongPair.class : LongWritable.class);
+		job2.setMapperClass(CorpusPairFilter.CastlerMapper.class);
+		job2.setMapOutputKeyClass(LongWritable.class);
+		job2.setMapOutputValueClass(StringDepLabelPair.class);
 
-		if (isWithCombiners)
-			job2.setCombinerClass(Job2CalcT_rN_rWithCombiner.CalcT_rN_rCombinerAndReducer.class);
+		job2.setReducerClass(CorpusPairFilter.FilterTopPairsReducer.class);
+		job2.setOutputKeyClass(StringDepLabelPair.class);
+		job2.setOutputValueClass(LongWritable.class);
 
-		job2.setReducerClass(isWithCombiners ? Job2CalcT_rN_rWithCombiner.CalcT_rN_rCombinerAndReducer.class : Job2CalcT_rN_r.CalcT_rN_rReducer.class);
-		job2.setOutputKeyClass(BooleanLongPair.class);
-		job2.setOutputValueClass(LongLongPair.class);
+		job2.setNumReduceTasks(1);
 
-		FileInputFormat.addInputPath(job2, new Path(args[0] + "Step1Output"));
-		FileOutputFormat.setOutputPath(job2, new Path(args[0] + "Step2Output"));
+		FileInputFormat.addInputPath(job2, new Path(args[0] + "Step1Output-CorpusWordCount"));
+		FileOutputFormat.setOutputPath(job2, new Path(args[0] + "Step2Output-CorpusPairFilter"));
 
 		System.out.println("Done building!\n" +
-		                   "Starting job 2...");
-		System.out.println("Job 2 completed with success status: " + (jobStatus = job2.waitForCompletion(true)) + "!");
+		                   "Starting job 2 - CorpusPairFilter...");
+		System.out.println("Job 2 - CorpusPairFilter: completed with success status: " + (jobStatus = job2.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;
 
 		//--------------------------------------------------------------------------------------------------------------
 
-		System.out.println("Building job 3...");
-		Job job3 = Job.getInstance(conf);
-		job3.setJarByClass(Job3JoinTriGramsWithT_rN_r.class);
 
-		MultipleInputs.addInputPath(job3, new Path(args[0] + "Step1Output"), SequenceFileInputFormat.class, Job3JoinTriGramsWithT_rN_r.TriGramMapper.class);
-		MultipleInputs.addInputPath(job3, new Path(args[0] + "Step2Output"), SequenceFileInputFormat.class, Job3JoinTriGramsWithT_rN_r.T_rN_rMapper.class);
-		job3.setOutputFormatClass(SequenceFileOutputFormat.class);
-
-		job3.setMapOutputKeyClass(BooleanBooleanLongTriple.class);
-		job3.setMapOutputValueClass(Text.class);
-
-		job3.setReducerClass(Job3JoinTriGramsWithT_rN_r.JoinReducer.class);
-		job3.setOutputKeyClass(Text.class);
-		job3.setOutputValueClass(LongLongPair.class);
-
-		job3.setPartitionerClass(Job3JoinTriGramsWithT_rN_r.JoinPartitioner.class);
-
-		FileOutputFormat.setOutputPath(job3, new Path(args[0] + "Step3Output"));
-
-		System.out.println("Done building!\n" +
-		                   "Starting job 3...");
-		System.out.println("Job 3 completed with success status: " + (jobStatus = job3.waitForCompletion(true)) + "!");
-		if (!jobStatus)
-			return;
 
 		//--------------------------------------------------------------------------------------------------------------
 
-		System.out.println("Building job 4...");
-		Job job4 = Job.getInstance(conf);
-		job4.setJarByClass(Job4CalcProb.class);
-
-		job4.setInputFormatClass(SequenceFileInputFormat.class);
-		job4.setOutputFormatClass(SequenceFileOutputFormat.class);
-
-		job4.setMapOutputKeyClass(Text.class);
-		job4.setMapOutputValueClass(LongLongPair.class);
-
-		job4.setReducerClass(Job4CalcProb.CalcProbReducer.class);
-		job4.setOutputKeyClass(Text.class);
-		job4.setOutputValueClass(DoubleWritable.class);
-
-		FileInputFormat.addInputPath(job4, new Path(args[0] + "Step3Output"));
-		FileOutputFormat.setOutputPath(job4, new Path(args[0] + "Step4Output"));
-
-		System.out.println("Done building!\n" +
-		                   "Starting job 4...");
-		System.out.println("Job 4 completed with success status: " + (jobStatus = job4.waitForCompletion(true)) + "!");
-		if (!jobStatus)
-			return;
-
-		//--------------------------------------------------------------------------------------------------------------
-
+		/*
 		System.out.println("Building job 5...");
 		Job job5 = Job.getInstance(conf);
 		job5.setJarByClass(Job5Sort.class);
@@ -152,12 +104,13 @@ public class EMR
 
 		job5.setNumReduceTasks(1);
 
-		FileInputFormat.addInputPath(job5, new Path(args[0] + "Step4Output"));
+		FileInputFormat.addInputPath(job5, new Path(args[0] + ""));
 		FileOutputFormat.setOutputPath(job5, new Path(args[0] + "FinalOutput"));
 
 		System.out.println("Done building!\n" +
 		                   "Starting job 5...");
 		System.out.println("Job 5 completed with success status: " + job5.waitForCompletion(true) + "!\n" +
 		                   "Exiting...");
+		*/
 	}
 }

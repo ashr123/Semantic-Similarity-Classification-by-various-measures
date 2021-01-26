@@ -27,7 +27,7 @@ public class CorpusPairFilter
 		}
 	}
 
-	public static class PairSummerCombinerAndReducer extends Reducer<LongWritable, StringDepLabelPair, StringDepLabelPair, LongWritable>
+	public static class FilterTopPairsReducer extends Reducer<LongWritable, StringDepLabelPair, StringDepLabelPair, LongWritable>
 	{
 		int counter = 0;
 //		MapWritable mapWritable = new MapWritable();
