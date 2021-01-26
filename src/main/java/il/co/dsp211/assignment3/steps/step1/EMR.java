@@ -21,10 +21,8 @@ public class EMR
 {
 	public static void main(String... args) throws IOException, ClassNotFoundException, InterruptedException
 	{
-		final boolean isWithCombiners = Boolean.parseBoolean(args[1]);
 		boolean jobStatus;
 		final Configuration conf = new Configuration();
-		conf.set("singleLetterInAWordRegex", args[2]);
 
 		System.out.println("Building job 1...");
 
@@ -38,23 +36,19 @@ public class EMR
 		job1.setMapOutputKeyClass(Text.class);
 		job1.setMapOutputValueClass(BooleanLongPair.class);
 
-		if (isWithCombiners)
-			job1.setCombinerClass(Job1DivideCorpus.CountCombiner.class);
+		job1.setCombinerClass(Job1DivideCorpus.CountCombiner.class);
 
 		job1.setReducerClass(Job1DivideCorpus.CountAndZipReducer.class);
 		job1.setOutputKeyClass(Text.class);
 		job1.setOutputValueClass(LongLongPair.class);
 
-		FileInputFormat.addInputPath(job1, new Path("s3://datasets.elasticmapreduce/ngrams/books/20090715/" + args[3] + "/3gram/data"));
+		FileInputFormat.addInputPath(job1, new Path("s3://temp"));
 		FileOutputFormat.setOutputPath(job1, new Path(args[0] + "Step1Output"));
 
 		System.out.println("Done building!\n" +
 		                   "Starting job 1...");
 		System.out.println("Job 1 completed with success status: " + (jobStatus = job1.waitForCompletion(true)) + "!");
 
-		conf.setLong("N", job1.getCounters().findCounter(NCounter.N_COUNTER).getValue());
-
-		System.out.println("Counter value is: " + conf.getLong("N", -1));
 		if (!jobStatus)
 			return;
 
