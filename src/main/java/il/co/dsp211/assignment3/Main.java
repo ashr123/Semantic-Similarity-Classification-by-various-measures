@@ -35,10 +35,7 @@ public class Main
 						.withReleaseLabel("emr-6.2.0") // specifies the EMR release version label, we recommend the latest release
 						// create a step to enable debugging in the AWS Management Console
 						.withSteps(new StepConfig("EMR with combiners", new HadoopJarStepConfig("s3://" + properties.getProperty("bucketName") + "/" + properties.getProperty("jarFileName") + ".jar")
-								.withArgs("s3://" + properties.getProperty("bucketName") + "/",
-										Boolean.toString(true),
-										properties.getProperty("singleLetterInAWordRegex"),
-										properties.getProperty("wordsBucket"))))
+								.withArgs("s3://" + properties.getProperty("bucketName") + "/")))
 						.withLogUri("s3://" + properties.getProperty("bucketName") + "/logs") // a URI in S3 for log files is required when debugging is enabled
 						.withServiceRole("EMR_DefaultRole") // replace the default with a custom IAM service role if one is used
 						.withJobFlowRole("EMR_EC2_DefaultRole") // replace the default with a custom EMR role for the EC2 instance profile if one is used
