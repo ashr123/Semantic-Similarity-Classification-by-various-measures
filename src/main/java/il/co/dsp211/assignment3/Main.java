@@ -7,6 +7,10 @@ import com.amazonaws.services.elasticmapreduce.model.HadoopJarStepConfig;
 import com.amazonaws.services.elasticmapreduce.model.JobFlowInstancesConfig;
 import com.amazonaws.services.elasticmapreduce.model.RunJobFlowRequest;
 import com.amazonaws.services.elasticmapreduce.model.StepConfig;
+import il.co.dsp211.assignment3.steps.step1.EMR;
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,6 +20,12 @@ import java.util.Properties;
 
 public class Main
 {
+	static
+	{
+		BasicConfigurator.configure();
+		Logger.getRootLogger().setLevel(Level.INFO);
+	}
+
 	public static void main(String... args) throws IOException
 	{
 		System.out.println("Creating cluster...");
@@ -31,10 +41,11 @@ public class Main
 				.build()
 				// create the cluster
 				.runJobFlow(new RunJobFlowRequest()
-						.withName("Knowledge base for Word Predictor")
+						.withName("Semantic Similarity Classification")
 						.withReleaseLabel("emr-6.2.0") // specifies the EMR release version label, we recommend the latest release
 						// create a step to enable debugging in the AWS Management Console
-						.withSteps(new StepConfig("EMR with combiners", new HadoopJarStepConfig("s3://" + properties.getProperty("bucketName") + "/" + properties.getProperty("jarFileName") + ".jar")
+						.withSteps(new StepConfig("EMR", new HadoopJarStepConfig("s3://" + properties.getProperty("bucketName") + "/" + properties.getProperty("jarFileName") + ".jar")
+								.withMainClass(EMR.class.getName())
 								.withArgs("s3://" + properties.getProperty("bucketName") + "/")))
 						.withLogUri("s3://" + properties.getProperty("bucketName") + "/logs") // a URI in S3 for log files is required when debugging is enabled
 						.withServiceRole("EMR_DefaultRole") // replace the default with a custom IAM service role if one is used

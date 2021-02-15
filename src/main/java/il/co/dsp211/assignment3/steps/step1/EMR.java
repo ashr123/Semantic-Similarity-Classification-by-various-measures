@@ -1,19 +1,16 @@
 package il.co.dsp211.assignment3.steps.step1;
 
-import il.co.dsp211.assignment3.steps.step1.jobs.*;
-import il.co.dsp211.assignment3.steps.utils.*;
+import il.co.dsp211.assignment3.steps.step1.jobs.CorpusPairFilter;
+import il.co.dsp211.assignment3.steps.step1.jobs.CorpusWordCount;
+import il.co.dsp211.assignment3.steps.utils.StringDepLabelPair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
 import java.io.IOException;
 
@@ -42,7 +39,7 @@ public class EMR
 		job1.setOutputKeyClass(StringDepLabelPair.class);
 		job1.setOutputValueClass(LongWritable.class);
 
-		FileInputFormat.addInputPath(job1, new Path("s3://Google_Syntactic_N-Grams_URL)"));
+		FileInputFormat.addInputPath(job1, new Path("s3://Google_Syntactic_N-Grams_URL"));
 		FileOutputFormat.setOutputPath(job1, new Path(args[0] + "Step1Output-CorpusWordCount"));
 
 		System.out.println("Done building!\n" +
@@ -82,9 +79,8 @@ public class EMR
 		if (!jobStatus)
 			return;
 
-		System.out.println("pairs:\n" + conf.get("pairs"));
+		System.out.println("Pairs:\n" + conf.get("pairs"));
 		//--------------------------------------------------------------------------------------------------------------
-
 
 
 		//--------------------------------------------------------------------------------------------------------------
