@@ -39,7 +39,7 @@ public class EMR
 		job1.setOutputKeyClass(StringDepLabelPair.class);
 		job1.setOutputValueClass(LongWritable.class);
 
-		FileInputFormat.addInputPath(job1, new Path("s3://Google_Syntactic_N-Grams_URL"));
+		FileInputFormat.addInputPath(job1, new Path("s3://assignment3dsp/biarcs"));
 		FileOutputFormat.setOutputPath(job1, new Path(args[0] + "Step1Output-CorpusWordCount"));
 
 		System.out.println("Done building!\n" +
