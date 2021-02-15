@@ -1,6 +1,10 @@
 package il.co.dsp211.assignment3.steps.utils;
 
-public enum DepLabels
+/**
+ * @implNote Taken from <a href="https://nlp.stanford.edu/software/dependencies_manual.pdf">Stanford typed dependencies manual</a>
+ */
+@SuppressWarnings("SpellCheckingInspection")
+public enum  DepLabels
 {
 	ACOMP,
 	ADVCL,

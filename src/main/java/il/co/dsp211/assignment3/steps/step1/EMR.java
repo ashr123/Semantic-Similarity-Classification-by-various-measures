@@ -65,9 +65,11 @@ public class EMR
 		job2.setMapOutputKeyClass(LongWritable.class);
 		job2.setMapOutputValueClass(StringDepLabelPair.class);
 
+		job2.setSortComparatorClass(LongWritable.DecreasingComparator.class);
+
 		job2.setReducerClass(CorpusPairFilter.FilterTopPairsReducer.class);
-		job2.setOutputKeyClass(StringDepLabelPair.class);
-		job2.setOutputValueClass(LongWritable.class);
+//		job2.setOutputKeyClass(StringDepLabelPair.class);
+//		job2.setOutputValueClass(LongWritable.class);
 
 		job2.setNumReduceTasks(1);
 
@@ -80,6 +82,7 @@ public class EMR
 		if (!jobStatus)
 			return;
 
+		System.out.println("pairs:\n" + conf.get("pairs"));
 		//--------------------------------------------------------------------------------------------------------------
 
 

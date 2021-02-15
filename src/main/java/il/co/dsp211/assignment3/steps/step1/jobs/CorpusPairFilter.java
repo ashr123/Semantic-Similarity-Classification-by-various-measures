@@ -1,9 +1,7 @@
 package il.co.dsp211.assignment3.steps.step1.jobs;
 
 import il.co.dsp211.assignment3.steps.utils.StringDepLabelPair;
-import org.apache.hadoop.io.BooleanWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.MapWritable;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.ReduceContext;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -27,9 +25,10 @@ public class CorpusPairFilter
 		}
 	}
 
-	public static class FilterTopPairsReducer extends Reducer<LongWritable, StringDepLabelPair, StringDepLabelPair, LongWritable>
+	public static class FilterTopPairsReducer extends Reducer<LongWritable, StringDepLabelPair, Void, Void>
 	{
-		int counter = 0;
+		private short counter = 0;
+		private final StringBuilder stringBuilder = new StringBuilder();
 //		MapWritable mapWritable = new MapWritable();
 
 		@Override
@@ -64,22 +63,21 @@ public class CorpusPairFilter
 		 * @param context ⟨⟨word, dep label⟩, vector index⟩
 		 */
 		@Override
-		protected void reduce(LongWritable key, Iterable<StringDepLabelPair> values, Context context) throws IOException, InterruptedException
+		protected void reduce(LongWritable key, Iterable<StringDepLabelPair> values, Context context)
 		{
 			final Iterator<StringDepLabelPair> iterator = values.iterator();
 			for (; counter < 100 && iterator.hasNext(); counter++, iterator.next()) ;
 			for (; counter < 1100 && iterator.hasNext(); counter++)
 			{
 				// For next step, we'll find the vector index by ⟨word, dep label⟩ (value = vector index)
-//				mapWritable.put(iterator.next(), new LongWritable(counter - 100));
-				context.write(iterator.next(), new LongWritable(counter - 100));
+				stringBuilder.append(iterator.next()).append('\t').append(counter - 100).append('\n');
 			}
 		}
 
-//		@Override
-//		protected void cleanup(Context context) throws IOException, InterruptedException
-//		{
-//			context.write(new BooleanWritable(), mapWritable);
-//		}
+		@Override
+		protected void cleanup(Context context) throws IOException, InterruptedException
+		{
+			context.getConfiguration().set("pairs", stringBuilder.toString());
+		}
 	}
 }
