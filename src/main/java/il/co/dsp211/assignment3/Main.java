@@ -46,7 +46,8 @@ public class Main
 						// create a step to enable debugging in the AWS Management Console
 						.withSteps(new StepConfig("EMR", new HadoopJarStepConfig("s3://" + properties.getProperty("bucketName") + "/" + properties.getProperty("jarFileName") + ".jar")
 								.withMainClass(EMR.class.getName())
-								.withArgs("s3://" + properties.getProperty("bucketName") + "/")))
+								.withArgs("s3://" + properties.getProperty("bucketName") + "/",
+										properties.getProperty("isReadSubset"))))
 						.withLogUri("s3://" + properties.getProperty("bucketName") + "/logs") // a URI in S3 for log files is required when debugging is enabled
 						.withServiceRole("EMR_DefaultRole") // replace the default with a custom IAM service role if one is used
 						.withJobFlowRole("EMR_EC2_DefaultRole") // replace the default with a custom EMR role for the EC2 instance profile if one is used

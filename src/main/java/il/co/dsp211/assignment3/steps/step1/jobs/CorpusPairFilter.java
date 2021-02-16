@@ -1,7 +1,10 @@
 package il.co.dsp211.assignment3.steps.step1.jobs;
 
-import il.co.dsp211.assignment3.steps.utils.StringDepLabelPair;
-import org.apache.hadoop.io.*;
+import il.co.dsp211.assignment3.steps.utils.StringStringPair;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.ReduceContext;
 import org.apache.hadoop.mapreduce.Reducer;
@@ -11,7 +14,7 @@ import java.util.Iterator;
 
 public class CorpusPairFilter
 {
-	public static class CastlerMapper extends Mapper<StringDepLabelPair, LongWritable, LongWritable, StringDepLabelPair>
+	public static class CastlerMapper extends Mapper<StringStringPair, LongWritable, LongWritable, StringStringPair>
 	{
 		/**
 		 * @param key     ⟨⟨word, dep label⟩,
@@ -19,17 +22,17 @@ public class CorpusPairFilter
 		 * @param context ⟨sum, ⟨word, dep label⟩⟩
 		 */
 		@Override
-		protected void map(StringDepLabelPair key, LongWritable value, Context context) throws IOException, InterruptedException
+		protected void map(StringStringPair key, LongWritable value, Context context) throws IOException, InterruptedException
 		{
-			context.write(value, key);
+			if (!key.getDepLabel().isEmpty())
+				context.write(value, key);
 		}
 	}
 
-	public static class FilterTopPairsReducer extends Reducer<LongWritable, StringDepLabelPair, Void, Void>
+	public static class FilterTopPairsReducer extends Reducer<LongWritable, StringStringPair, Void, Void>
 	{
-		private short counter = 0;
 		private final StringBuilder stringBuilder = new StringBuilder();
-//		MapWritable mapWritable = new MapWritable();
+		private short counter = 0;
 
 		@Override
 		public void run(Context context) throws IOException, InterruptedException
@@ -41,10 +44,10 @@ public class CorpusPairFilter
 				{
 					reduce(context.getCurrentKey(), context.getValues(), context);
 					// If a back up store is used, reset it
-					Iterator<StringDepLabelPair> iter = context.getValues().iterator();
+					final Iterator<StringStringPair> iter = context.getValues().iterator();
 					if (iter instanceof ReduceContext.ValueIterator)
 					{
-						((ReduceContext.ValueIterator<StringDepLabelPair>) iter).resetBackupStore();
+						((ReduceContext.ValueIterator<StringStringPair>) iter).resetBackupStore();
 					}
 				}
 			}
@@ -63,9 +66,9 @@ public class CorpusPairFilter
 		 * @param context ⟨⟨word, dep label⟩, vector index⟩
 		 */
 		@Override
-		protected void reduce(LongWritable key, Iterable<StringDepLabelPair> values, Context context)
+		protected void reduce(LongWritable key, Iterable<StringStringPair> values, Context context)
 		{
-			final Iterator<StringDepLabelPair> iterator = values.iterator();
+			final Iterator<StringStringPair> iterator = values.iterator();
 			for (; counter < 100 && iterator.hasNext(); counter++, iterator.next()) ;
 			for (; counter < 1100 && iterator.hasNext(); counter++)
 			{
@@ -75,9 +78,45 @@ public class CorpusPairFilter
 		}
 
 		@Override
-		protected void cleanup(Context context) throws IOException, InterruptedException
+		protected void cleanup(Context context) throws IOException
 		{
-			context.getConfiguration().set("pairs", stringBuilder.toString());
+			try (FileSystem fileSystem = FileSystem.get(context.getConfiguration());
+			     FSDataOutputStream out = fileSystem.create(new Path("features")))
+			{
+				out.writeUTF(stringBuilder.toString());
+			}
 		}
+
+//		private void temp(Context context) throws IOException
+//		{
+//			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(BuildCoVectors.VectorRecordFilterMapper.class.getResourceAsStream("word-relatedness.txt"))))
+//			{
+//				GOLDEN_STANDARD_WORDS = bufferedReader.lines().parallel()
+//						.map(line -> line.split("\t"))
+//						.flatMap(strings -> Stream.of(strings[0], strings[1]))
+//						.collect(Collectors.toSet());
+//			}
+
+
+//			FileSystem fileSystem = FileSystem.get(context.getConfiguration());
+//// Check if the file already exists
+//			//			if (fileSystem.exists(path)) {
+////				System.out.println("File " + dest + " already exists");
+////				return;
+////			}
+//// Create a new file and write data to it.
+//			FSDataOutputStream out = fileSystem.create(new Path("featurs.ext"));
+//
+//			InputStream in = new BufferedInputStream(new FileInputStream(new File(source)));
+//			byte[] b = new byte[1024];
+//			int numBytes = 0;
+//			while ((numBytes = in.read(b)) > 0) {
+//				out.write(b, 0, numBytes);
+//			}
+//// Close all the file descripters
+//			in.close();
+//			out.close();
+//			fileSystem.close();
+//		}
 	}
 }

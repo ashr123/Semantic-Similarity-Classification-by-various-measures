@@ -1,7 +1,6 @@
 package il.co.dsp211.assignment3.steps.step1.jobs;
 
-import il.co.dsp211.assignment3.steps.utils.DepLabels;
-import il.co.dsp211.assignment3.steps.utils.StringDepLabelPair;
+import il.co.dsp211.assignment3.steps.utils.StringStringPair;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -12,7 +11,7 @@ import java.util.stream.StreamSupport;
 
 public class CorpusWordCount
 {
-	public static class WordCounterMapper extends Mapper<LongWritable, Text, StringDepLabelPair, LongWritable>
+	public static class WordCounterMapper extends Mapper<LongWritable, Text, StringStringPair, LongWritable>
 	{
 		public static final LongWritable ONE = new LongWritable(1);
 
@@ -28,12 +27,13 @@ public class CorpusWordCount
 			for (String tokensSplit : tokens)
 			{
 				final String[] token = tokensSplit.split("/");
-				context.write(new StringDepLabelPair(token[0], DepLabels.valueOf(token[2])), ONE);
+				context.write(new StringStringPair(token[0], token[2]), ONE); // count(f)
+				context.write(new StringStringPair(token[0], ""), ONE); // count(l)
 			}
 		}
 	}
 
-	public static class PairSummerCombinerAndReducer extends Reducer<StringDepLabelPair, LongWritable, StringDepLabelPair, LongWritable>
+	public static class PairSummerCombinerAndReducer extends Reducer<StringStringPair, LongWritable, StringStringPair, LongWritable>
 	{
 
 		/**
@@ -42,12 +42,12 @@ public class CorpusWordCount
 		 * @param context ⟨⟨word, dep label⟩, sum⟩
 		 */
 		@Override
-		protected void reduce(StringDepLabelPair key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException
+		protected void reduce(StringStringPair key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException
 		{
-			context.write(key,
-					new LongWritable(StreamSupport.stream(values.spliterator(), false)
-							.mapToLong(LongWritable::get)
-							.sum()));
+			final LongWritable sum = new LongWritable(StreamSupport.stream(values.spliterator(), false)
+					.mapToLong(LongWritable::get)
+					.sum());
+			context.write(key, sum);
 		}
 	}
 }

@@ -2,32 +2,30 @@ package il.co.dsp211.assignment3.steps.utils;
 
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.WritableComparable;
-import org.apache.hadoop.io.WritableUtils;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Objects;
 
-public class StringDepLabelPair implements WritableComparable<StringDepLabelPair>
+public class StringStringPair implements WritableComparable<StringStringPair>
 {
-	private String word;
-	private DepLabels depLabel;
+	private String word, depLabel;
 
-	public StringDepLabelPair()
+	public StringStringPair()
 	{
 	}
 
-	public StringDepLabelPair(String word, DepLabels depLabel)
+	public StringStringPair(String word, String depLabel)
 	{
 		this.word = word;
 		this.depLabel = depLabel;
 	}
 
-	public static StringDepLabelPair of(String string)
+	public static StringStringPair of(String string)
 	{
-		final String[] values = string.split("🤠");
-		return new StringDepLabelPair(values[0], DepLabels.valueOf(values[1]));
+		final String[] values = string.split("#");
+		return new StringStringPair(values[0], values[1]);
 	}
 
 	public String getWord()
@@ -35,7 +33,7 @@ public class StringDepLabelPair implements WritableComparable<StringDepLabelPair
 		return word;
 	}
 
-	public DepLabels getDepLabel()
+	public String getDepLabel()
 	{
 		return depLabel;
 	}
@@ -45,11 +43,11 @@ public class StringDepLabelPair implements WritableComparable<StringDepLabelPair
 	{
 		if (this == o)
 			return true;
-		if (!(o instanceof StringDepLabelPair))
+		if (!(o instanceof StringStringPair))
 			return false;
-		StringDepLabelPair that = (StringDepLabelPair) o;
+		StringStringPair that = (StringStringPair) o;
 		return word.equals(that.word) &&
-		       depLabel == that.depLabel;
+		       depLabel.equals(that.depLabel);
 	}
 
 	@Override
@@ -61,11 +59,11 @@ public class StringDepLabelPair implements WritableComparable<StringDepLabelPair
 	@Override
 	public String toString()
 	{
-		return word + "🤠" + depLabel;
+		return word + "#" + depLabel;
 	}
 
 	@Override
-	public int compareTo(StringDepLabelPair o)
+	public int compareTo(StringStringPair o)
 	{
 		final int wordCompare = word.compareTo(o.word);
 		return wordCompare != 0 ? wordCompare : depLabel.compareTo(o.depLabel);
@@ -75,13 +73,13 @@ public class StringDepLabelPair implements WritableComparable<StringDepLabelPair
 	public void write(DataOutput out) throws IOException
 	{
 		Text.writeString(out, word);
-		WritableUtils.writeEnum(out, depLabel);
+		Text.writeString(out, depLabel);
 	}
 
 	@Override
 	public void readFields(DataInput in) throws IOException
 	{
 		word = Text.readString(in);
-		depLabel = WritableUtils.readEnum(in, DepLabels.class);
+		depLabel = Text.readString(in);
 	}
 }

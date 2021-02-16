@@ -2,8 +2,9 @@ package il.co.dsp211.assignment3.steps.step1;
 
 import il.co.dsp211.assignment3.steps.step1.jobs.CorpusPairFilter;
 import il.co.dsp211.assignment3.steps.step1.jobs.CorpusWordCount;
-import il.co.dsp211.assignment3.steps.utils.StringDepLabelPair;
+import il.co.dsp211.assignment3.steps.utils.StringStringPair;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.mapreduce.Job;
@@ -12,7 +13,12 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class EMR
 {
@@ -30,16 +36,16 @@ public class EMR
 		job1.setOutputFormatClass(SequenceFileOutputFormat.class);
 
 		job1.setMapperClass(CorpusWordCount.WordCounterMapper.class);
-		job1.setMapOutputKeyClass(StringDepLabelPair.class);
+		job1.setMapOutputKeyClass(StringStringPair.class);
 		job1.setMapOutputValueClass(LongWritable.class);
 
 		job1.setCombinerClass(CorpusWordCount.PairSummerCombinerAndReducer.class);
 
 		job1.setReducerClass(CorpusWordCount.PairSummerCombinerAndReducer.class);
-		job1.setOutputKeyClass(StringDepLabelPair.class);
+		job1.setOutputKeyClass(StringStringPair.class);
 		job1.setOutputValueClass(LongWritable.class);
 
-		FileInputFormat.addInputPath(job1, new Path("s3://assignment3dsp/biarcs"));
+		FileInputFormat.addInputPath(job1, new Path("s3://assignment3dsp/biarcs" + (Boolean.parseBoolean(args[1]) ? "/biarcs.00-of-99" : "")));
 		FileOutputFormat.setOutputPath(job1, new Path(args[0] + "Step1Output-CorpusWordCount"));
 
 		System.out.println("Done building!\n" +
@@ -60,7 +66,7 @@ public class EMR
 
 		job2.setMapperClass(CorpusPairFilter.CastlerMapper.class);
 		job2.setMapOutputKeyClass(LongWritable.class);
-		job2.setMapOutputValueClass(StringDepLabelPair.class);
+		job2.setMapOutputValueClass(StringStringPair.class);
 
 		job2.setSortComparatorClass(LongWritable.DecreasingComparator.class);
 
@@ -79,7 +85,6 @@ public class EMR
 		if (!jobStatus)
 			return;
 
-		System.out.println("Pairs:\n" + conf.get("pairs"));
 		//--------------------------------------------------------------------------------------------------------------
 
 
