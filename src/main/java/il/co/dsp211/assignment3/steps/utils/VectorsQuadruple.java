@@ -155,11 +155,11 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 		}
 	}
 
-	private static VectorsQuadruple of(String string)
-	{
-		final String[] values = string.split("🤠");
-
-	}
+//	private static VectorsQuadruple of(String string)
+//	{
+//		final String[] values = string.split("🤠");
+//
+//	}
 
 	@Override
 	public String toString()
