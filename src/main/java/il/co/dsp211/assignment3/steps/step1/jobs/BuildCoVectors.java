@@ -4,7 +4,6 @@ import il.co.dsp211.assignment3.steps.utils.StringStringPair;
 import il.co.dsp211.assignment3.steps.utils.VectorsQuadruple;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -107,7 +106,8 @@ public class BuildCoVectors
 			StreamSupport.stream(values.spliterator(), false)
 					.filter(map::containsKey)
 					.mapToInt(map::get)
-					.forEach(i -> {
+					.forEach(i ->
+					{
 						vector5[i].set(vector5[i].get() + 1);
 						// toto vector6
 						// todo vector7
