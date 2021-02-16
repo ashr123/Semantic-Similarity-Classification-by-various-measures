@@ -27,6 +27,77 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 		this.vector8 = vector8;
 	}
 
+	private static <T extends Comparable<? super T>> int compare(T[] a, T[] b)
+	{
+		if (a == b)
+			return 0;
+		// A null array is less than a non-null array
+		if (a == null || b == null)
+			return a == null ? -1 : 1;
+
+		int length = Math.min(a.length, b.length);
+		for (int i = 0; i < length; i++)
+		{
+			T oa = a[i];
+			T ob = b[i];
+			if (oa != ob)
+			{
+				// A null element is less than a non-null element
+				if (oa == null || ob == null)
+					return oa == null ? -1 : 1;
+				int v = oa.compareTo(ob);
+				if (v != 0)
+					return v;
+			}
+		}
+
+		return a.length - b.length;
+	}
+
+	private static void arraysString(StringBuilder b, Object[] a)
+	{
+		if (a == null)
+		{
+			b.append("null");
+			return;
+		}
+
+		int iMax = a.length - 1;
+		if (iMax == -1)
+			return;
+
+		for (int i = 0; ; i++)
+		{
+			b.append(a[i]);
+			if (i == iMax)
+				return;
+			b.append("#");
+		}
+	}
+
+	private static VectorsQuadruple of(String string)
+	{
+		final String[] values = string.split("🤠"),
+				vector5Strings = values[0].split("#"),
+				vector6Strings = values[1].split("#"),
+				vector7Strings = values[2].split("#"),
+				vector8Strings = values[3].split("#");
+
+		final LongWritable[] vector5 = new LongWritable[vector5Strings.length];
+		Arrays.parallelSetAll(vector5, i -> new LongWritable(Long.parseLong(vector5Strings[i])));
+
+		final DoubleWritable[]
+				vector6 = new DoubleWritable[vector6Strings.length],
+				vector7 = new DoubleWritable[vector7Strings.length],
+				vector8 = new DoubleWritable[vector8Strings.length];
+
+		Arrays.parallelSetAll(vector6, i -> new DoubleWritable(Double.parseDouble(vector6Strings[i])));
+		Arrays.parallelSetAll(vector7, i -> new DoubleWritable(Double.parseDouble(vector7Strings[i])));
+		Arrays.parallelSetAll(vector8, i -> new DoubleWritable(Double.parseDouble(vector8Strings[i])));
+
+		return new VectorsQuadruple(vector5, vector6, vector7, vector8);
+	}
+
 	public LongWritable[] getVector5()
 	{
 		return vector5;
@@ -45,30 +116,6 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 	public DoubleWritable[] getVector8()
 	{
 		return vector8;
-	}
-
-	private static <T extends Comparable<? super T>> int compare(T[] a, T[] b) {
-		if (a == b)
-			return 0;
-		// A null array is less than a non-null array
-		if (a == null || b == null)
-			return a == null ? -1 : 1;
-
-		int length = Math.min(a.length, b.length);
-		for (int i = 0; i < length; i++) {
-			T oa = a[i];
-			T ob = b[i];
-			if (oa != ob) {
-				// A null element is less than a non-null element
-				if (oa == null || ob == null)
-					return oa == null ? -1 : 1;
-				int v = oa.compareTo(ob);
-				if (v != 0)
-					return v;
-			}
-		}
-
-		return a.length - b.length;
 	}
 
 	@Override
@@ -135,31 +182,6 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 		result = 31 * result + Arrays.hashCode(vector8);
 		return result;
 	}
-
-	private static void arraysString(StringBuilder b, Object[] a) {
-		if (a == null)
-		{
-			b.append("null");
-			return;
-		}
-
-		int iMax = a.length - 1;
-		if (iMax == -1)
-			return;
-
-		for (int i = 0; ; i++) {
-			b.append(a[i]);
-			if (i == iMax)
-				return;
-			b.append("#");
-		}
-	}
-
-//	private static VectorsQuadruple of(String string)
-//	{
-//		final String[] values = string.split("🤠");
-//
-//	}
 
 	@Override
 	public String toString()
