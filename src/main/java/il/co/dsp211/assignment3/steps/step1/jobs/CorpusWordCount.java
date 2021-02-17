@@ -1,8 +1,10 @@
 package il.co.dsp211.assignment3.steps.step1.jobs;
 
+import il.co.dsp211.assignment3.steps.utils.NCounter;
 import il.co.dsp211.assignment3.steps.utils.StringStringPair;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -35,6 +37,12 @@ public class CorpusWordCount
 
 	public static class PairSummerCombinerAndReducer extends Reducer<StringStringPair, LongWritable, StringStringPair, LongWritable>
 	{
+		private Counter counter;
+
+		@Override
+		protected void setup(Context context) throws IOException, InterruptedException {
+			counter = context.getCounter(NCounter.N_COUNTER);
+		}
 
 		/**
 		 * @param key     ⟨⟨word, dep label⟩,
@@ -44,10 +52,11 @@ public class CorpusWordCount
 		@Override
 		protected void reduce(StringStringPair key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException
 		{
-			final LongWritable sum = new LongWritable(StreamSupport.stream(values.spliterator(), false)
+			final long sum = StreamSupport.stream(values.spliterator(), false)
 					.mapToLong(LongWritable::get)
-					.sum());
-			context.write(key, sum);
+					.sum();
+			context.write(key, new LongWritable(sum));
+			counter.increment(sum);
 		}
 	}
 }
