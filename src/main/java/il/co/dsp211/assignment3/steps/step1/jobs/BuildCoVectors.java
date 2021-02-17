@@ -50,7 +50,7 @@ public class BuildCoVectors
 		{
 			final String[] tokens = value.toString().split("\t")[1].split(" ");
 			if (tokens.length < 3)
-				continue;
+				return;
 			for (final String tokensSplit : tokens)
 			{
 				final String[] token = tokensSplit.split("/");

@@ -27,7 +27,7 @@ public class CorpusWordCount
 		{
 			final String[] tokens = value.toString().split("\t")[1].split(" ");
 			if (tokens.length < 3)
-				continue;
+				return;
 			for (String tokensSplit : tokens)
 			{
 				final String[] token = tokensSplit.split("/");
