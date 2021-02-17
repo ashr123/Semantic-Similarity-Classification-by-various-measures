@@ -49,15 +49,13 @@ public class BuildCoVectors
 		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException
 		{
 			final String[] tokens = value.toString().split("\t")[1].split(" ");
-			if (tokens.length < 3)
-				return;
 			for (final String tokensSplit : tokens)
 			{
 				final String[] token = tokensSplit.split("/");
 				if (token.length != 4)
 					continue;
 				final int headIndex = Integer.parseInt(token[3]);
-				if (headIndex != 0 && goldenStandardWords.contains(token[0]))
+				if (headIndex != 0 && headIndex < tokens.length && goldenStandardWords.contains(token[0]))
 					context.write(new Text(token[0]), new StringStringPair(tokens[headIndex].split("/")[0], token[2]));
 			}
 		}
