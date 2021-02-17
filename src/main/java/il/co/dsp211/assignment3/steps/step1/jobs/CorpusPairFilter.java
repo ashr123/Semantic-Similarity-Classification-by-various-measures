@@ -62,7 +62,7 @@ public class CorpusPairFilter
 		 * <p>IMPORTANT2: Use TextOutputFormat!!!</p>
 		 *
 		 * @param key     ⟨count(f),
-		 * @param values  ⟨word, dep label⟩⟩
+		 * @param values  [⟨word, dep label⟩]⟩
 		 * @param context ⟨⟨word, dep label⟩, vector index, count(f)⟩
 		 */
 		@Override
@@ -71,10 +71,7 @@ public class CorpusPairFilter
 			final Iterator<StringStringPair> iterator = values.iterator();
 			for (; counter < 100 && iterator.hasNext(); counter++, iterator.next()) ;
 			for (; counter < 1100 && iterator.hasNext(); counter++)
-			{
-				// For next step, we'll find the vector index by ⟨word, dep label⟩ (value = vector index)
 				stringBuilder.append(iterator.next()).append('\t').append(counter - 100).append('\t').append(key.get()).append('\n');
-			}
 		}
 
 		@Override

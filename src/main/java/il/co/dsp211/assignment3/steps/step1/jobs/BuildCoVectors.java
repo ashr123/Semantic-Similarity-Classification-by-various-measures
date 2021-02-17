@@ -14,41 +14,32 @@ import org.apache.hadoop.mapreduce.Reducer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BuildCoVectors
 {
-	private static Set<String> GOLDEN_STANDARD_WORDS = null;
-
-	static
-	{
-		//noinspection ConstantConditions
-		if (GOLDEN_STANDARD_WORDS == null)
-			synchronized (BuildCoVectors.class)
-			{
-				if (GOLDEN_STANDARD_WORDS == null)
-					try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("word-relatedness.txt"))))
-					{
-						GOLDEN_STANDARD_WORDS = bufferedReader.lines().parallel()
-								.map(line -> line.split("\t"))
-								.flatMap(strings -> Stream.of(strings[0], strings[1]))
-								.collect(Collectors.toSet());
-					}
-					catch (IOException e)
-					{
-						throw new UncheckedIOException(e);
-					}
-			}
-	}
-
 	public static class VectorRecordFilterMapper extends Mapper<LongWritable, Text, Text, StringStringPair>
 	{
+		private Set<String> goldenStandardWords;
+
+		@Override
+		protected void setup(Context context) throws IOException, InterruptedException
+		{
+			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("word-relatedness.txt"))))
+			{
+				goldenStandardWords = bufferedReader.lines().parallel()
+						.map(line -> line.split("\t"))
+						.flatMap(strings -> Stream.of(strings[0], strings[1]))
+						.collect(Collectors.toSet());
+			}
+		}
+
 		/**
 		 * @param key     ⟨line number,
 		 * @param value   ⟨head word, ⟨⟨word<sub>1</sub>, pos tag, dep label, head index⟩, ⟨word<sub>2</sub>, pos tag, dep label, head index⟩, ⟨word<sub>3</sub>, pos tag, dep label, head index⟩⟩, total count, counts by year⟩
@@ -59,11 +50,13 @@ public class BuildCoVectors
 		{
 			final String[] split = value.toString().split("\t");
 			final String[] tokens = split[1].split(" ");
-			for (String tokensSplit : tokens)
+			for (final String tokensSplit : tokens)
 			{
 				final String[] token = tokensSplit.split("/");
+				if (token.length != 4)
+					continue;
 				final int headIndex = Integer.parseInt(token[3]);
-				if (headIndex != 0 && GOLDEN_STANDARD_WORDS.contains(token[0]))
+				if (headIndex != 0 && goldenStandardWords.contains(token[0]))
 					context.write(new Text(token[0]), new StringStringPair(tokens[headIndex].split("/")[0], token[2]));
 			}
 		}
@@ -80,9 +73,7 @@ public class BuildCoVectors
 		protected void map(StringStringPair key, LongWritable value, Context context) throws IOException, InterruptedException
 		{
 			if (key.getDepLabel().isEmpty())
-			{
 				context.write(new Text(key.getWord()), new StringStringPair("", value.toString()));
-			}
 		}
 	}
 
@@ -118,26 +109,25 @@ public class BuildCoVectors
 					vector6 = new DoubleWritable[1000],
 					vector7 = new DoubleWritable[1000],
 					vector8 = new DoubleWritable[1000];
-			Arrays.parallelSetAll(vector5, LongWritable::new);
-			Arrays.parallelSetAll(vector6, DoubleWritable::new);
-			Arrays.parallelSetAll(vector7, DoubleWritable::new);
-			Arrays.parallelSetAll(vector8, DoubleWritable::new);
+			Arrays.parallelSetAll(vector5, value -> new LongWritable());
+			final IntFunction<DoubleWritable> doubleWritableIntFunction = value -> new DoubleWritable();
+			Arrays.parallelSetAll(vector6, doubleWritableIntFunction);
+			Arrays.parallelSetAll(vector7, doubleWritableIntFunction);
+			Arrays.parallelSetAll(vector8, doubleWritableIntFunction);
 
 			final Iterator<StringStringPair> iterator = values.iterator();
 
 			long countLittleL = -1;
 
 			// Calc Vector 5
-			for (final StringStringPair next : values) {
-				if (next.getWord().isEmpty()) {
+			for (final StringStringPair next : values)
+				if (next.getWord().isEmpty())
 					countLittleL = Long.parseLong(iterator.next().getDepLabel());
-				}
 				else if (map.containsKey(next))
 				{
 					final short i = map.get(next).getKey();
 					vector5[i].set(vector5[i].get() + 1);
 				}
-			}
 
 			// Calc Vectors 6-8
 			for (final StringStringPair next : values)
@@ -151,23 +141,8 @@ public class BuildCoVectors
 					vector7[i].set(Math.log10((1.0 * vector5[i].get()) / counterFL / (probLittleL * probLittleF)) / Math.log10(2));
 					vector8[i].set((1.0 * vector5[i].get() / counterFL - probLittleL * probLittleF) / Math.sqrt(probLittleL * probLittleF));
 				}
-
-//			iterator = values.iterator();
-//
-//			while (iterator.hasNext())
-//			{
-//				StringStringPair next = iterator.next();
-//				if (map.containsKey(next))
-//				{
-//					short i = map.get(next).getKey();
-//					double probLittleL = 1.0 * countLittleL / counterFL;
-//					double probLittleF = 1.0 * map.get(next).getValue() / counterFL;
-//					vector6[i].set(1.0 * vector5[i].get() / countLittleL);
-//					vector7[i].set((1.0 * vector5[i].get() / counterFL) / (probLittleL * probLittleF));
-//					vector8[i].set((1.0 * vector5[i].get() / counterFL) - (probLittleL * probLittleF) / (Math.sqrt(probLittleL * probLittleF)));
-//				}
-//			}
 			context.write(key, new VectorsQuadruple(vector5, vector6, vector7, vector8));
+//			context.write(key, new ArrayWritable(LongWritable.class, vector5));
 		}
 	}
 }

@@ -29,6 +29,8 @@ public class CorpusWordCount
 			for (String tokensSplit : tokens)
 			{
 				final String[] token = tokensSplit.split("/");
+				if (token.length != 4)
+					continue;
 				context.write(new StringStringPair(token[0], token[2]), ONE); // count(f)
 				context.write(new StringStringPair(token[0], ""), ONE); // count(l)
 			}

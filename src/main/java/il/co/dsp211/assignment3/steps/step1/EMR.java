@@ -5,8 +5,10 @@ import il.co.dsp211.assignment3.steps.step1.jobs.CorpusPairFilter;
 import il.co.dsp211.assignment3.steps.step1.jobs.CorpusWordCount;
 import il.co.dsp211.assignment3.steps.utils.NCounter;
 import il.co.dsp211.assignment3.steps.utils.StringStringPair;
+import il.co.dsp211.assignment3.steps.utils.VectorsQuadruple;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -92,14 +94,21 @@ public class EMR
 		Job job3 = Job.getInstance(conf);
 		job3.setJarByClass(BuildCoVectors.class);
 
+//		FileInputFormat.addInputPath(job3, corpusPath); // TODO delete
+//		job3.setInputFormatClass(SequenceFileInputFormat.class); // TODO delete
+//		job3.setMapperClass(BuildCoVectors.VectorRecordFilterMapper.class); // TODO delete
+
 		MultipleInputs.addInputPath(job3, corpusPath, SequenceFileInputFormat.class, BuildCoVectors.VectorRecordFilterMapper.class);
 		MultipleInputs.addInputPath(job3, new Path(args[0] + "Step1Output-CorpusWordCount"), SequenceFileInputFormat.class, BuildCoVectors.CounterLittleLMapper.class);
+		job3.setMapOutputKeyClass(Text.class);
+		job3.setMapOutputValueClass(StringStringPair.class); // TODO change
 //		job3.setOutputFormatClass(SequenceFileOutputFormat.class); TODO uncomment
 
-		job3.setMapOutputKeyClass(Text.class);
-		job3.setMapOutputValueClass(StringStringPair.class);
-
 		job3.setReducerClass(BuildCoVectors.CalculateEmbeddingsReducer.class);
+//		job3.setNumReduceTasks(0); // TODO delete
+		job3.setOutputKeyClass(Text.class);
+		job3.setOutputValueClass(VectorsQuadruple.class);
+
 
 		FileOutputFormat.setOutputPath(job3, new Path(args[0] + "Step3Output-BuildCoVectors"));
 
