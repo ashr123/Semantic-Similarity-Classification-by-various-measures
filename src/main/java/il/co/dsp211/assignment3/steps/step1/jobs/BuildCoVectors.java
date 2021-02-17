@@ -114,14 +114,12 @@ public class BuildCoVectors
 			Arrays.parallelSetAll(vector7, doubleWritableIntFunction);
 			Arrays.parallelSetAll(vector8, doubleWritableIntFunction);
 
-			final Iterator<StringStringPair> iterator = values.iterator();
-
 			long countLittleL = -1;
 
 			// Calc Vector 5
 			for (final StringStringPair next : values)
 				if (next.getWord().isEmpty())
-					countLittleL = Long.parseLong(iterator.next().getDepLabel());
+					countLittleL = Long.parseLong(next.getDepLabel());
 				else if (map.containsKey(next))
 				{
 					final short i = map.get(next).getKey();
