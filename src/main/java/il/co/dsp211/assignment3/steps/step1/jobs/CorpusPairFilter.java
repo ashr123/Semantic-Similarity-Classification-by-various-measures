@@ -81,7 +81,7 @@ public class CorpusPairFilter
 		protected void cleanup(Context context) throws IOException
 		{
 			try (FileSystem fileSystem = FileSystem.get(context.getConfiguration());
-			     FSDataOutputStream out = fileSystem.create(new Path("features")))
+			     FSDataOutputStream out = fileSystem.create(new Path("features.txt")))
 			{
 				out.writeUTF(stringBuilder.toString());
 			}

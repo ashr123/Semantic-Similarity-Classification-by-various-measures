@@ -94,7 +94,7 @@ public class EMR
 
 		MultipleInputs.addInputPath(job3, corpusPath, SequenceFileInputFormat.class, BuildCoVectors.VectorRecordFilterMapper.class);
 		MultipleInputs.addInputPath(job3, new Path(args[0] + "Step1Output-CorpusWordCount"), SequenceFileInputFormat.class, BuildCoVectors.CounterLittleLMapper.class);
-//		job3.setOutputFormatClass(SequenceFileOutputFormat.class);
+//		job3.setOutputFormatClass(SequenceFileOutputFormat.class); TODO uncomment
 
 		job3.setMapOutputKeyClass(Text.class);
 		job3.setMapOutputValueClass(StringStringPair.class);

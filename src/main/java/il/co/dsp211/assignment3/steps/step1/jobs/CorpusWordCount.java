@@ -40,7 +40,8 @@ public class CorpusWordCount
 		private Counter counter;
 
 		@Override
-		protected void setup(Context context) throws IOException, InterruptedException {
+		protected void setup(Context context) throws IOException, InterruptedException
+		{
 			counter = context.getCounter(NCounter.N_COUNTER);
 		}
 
