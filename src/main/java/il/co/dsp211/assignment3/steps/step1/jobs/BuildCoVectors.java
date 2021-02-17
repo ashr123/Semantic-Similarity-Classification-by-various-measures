@@ -48,8 +48,9 @@ public class BuildCoVectors
 		@Override
 		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException
 		{
-			final String[] split = value.toString().split("\t");
-			final String[] tokens = split[1].split(" ");
+			final String[] tokens = value.toString().split("\t")[1].split(" ");
+			if (tokens.length < 3)
+				continue;
 			for (final String tokensSplit : tokens)
 			{
 				final String[] token = tokensSplit.split("/");
