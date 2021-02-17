@@ -8,6 +8,7 @@ import il.co.dsp211.assignment3.steps.utils.StringStringPair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
@@ -17,8 +18,10 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
 import java.io.IOException;
 
-public class EMR {
-	public static void main(String... args) throws IOException, ClassNotFoundException, InterruptedException {
+public class EMR
+{
+	public static void main(String... args) throws IOException, ClassNotFoundException, InterruptedException
+	{
 		boolean jobStatus;
 		final Configuration conf = new Configuration();
 
@@ -40,11 +43,12 @@ public class EMR {
 		job1.setOutputKeyClass(StringStringPair.class);
 		job1.setOutputValueClass(LongWritable.class);
 
-		FileInputFormat.addInputPath(job1, new Path("s3://assignment3dsp/biarcs" + (Boolean.parseBoolean(args[1]) ? "/biarcs.00-of-99" : "")));
+		final Path corpusPath = new Path("s3://assignment3dsp/biarcs" + (Boolean.parseBoolean(args[1]) ? "/biarcs.00-of-99" : ""));
+		FileInputFormat.addInputPath(job1, corpusPath);
 		FileOutputFormat.setOutputPath(job1, new Path(args[0] + "Step1Output-CorpusWordCount"));
 
 		System.out.println("Done building!\n" +
-				"Starting job 1 - Corpus Word Count...");
+		                   "Starting job 1 - Corpus Word Count...");
 		System.out.println("Job 1 - Corpus Word Count: completed with success status: " + (jobStatus = job1.waitForCompletion(true)) + "!");
 
 		conf.setLong("CounterFL", job1.getCounters().findCounter(NCounter.N_COUNTER).getValue());
@@ -77,7 +81,7 @@ public class EMR {
 		FileOutputFormat.setOutputPath(job2, new Path(args[0] + "Step2Output-CorpusPairFilter"));
 
 		System.out.println("Done building!\n" +
-				"Starting job 2 - CorpusPairFilter...");
+		                   "Starting job 2 - CorpusPairFilter...");
 		System.out.println("Job 2 - CorpusPairFilter: completed with success status: " + (jobStatus = job2.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;
@@ -88,27 +92,19 @@ public class EMR {
 		Job job3 = Job.getInstance(conf);
 		job3.setJarByClass(BuildCoVectors.class);
 
+		MultipleInputs.addInputPath(job3, corpusPath, SequenceFileInputFormat.class, BuildCoVectors.VectorRecordFilterMapper.class);
 		MultipleInputs.addInputPath(job3, new Path(args[0] + "Step1Output-CorpusWordCount"), SequenceFileInputFormat.class, BuildCoVectors.CounterLittleLMapper.class);
-		MultipleInputs.addInputPath(job3, new Path(args[0] + "Step2Output-CorpusPairFilter"), SequenceFileInputFormat.class, BuildCoVectors.VectorRecordFilterMapper.class);
-		job3.setOutputFormatClass(SequenceFileOutputFormat.class);
+//		job3.setOutputFormatClass(SequenceFileOutputFormat.class);
 
-		// TODO: EDIT INPUTS
-		job3.setMapOutputKeyClass(LongWritable.class);
+		job3.setMapOutputKeyClass(Text.class);
 		job3.setMapOutputValueClass(StringStringPair.class);
 
-		job3.setSortComparatorClass(LongWritable.DecreasingComparator.class);
-
 		job3.setReducerClass(BuildCoVectors.CalculateEmbeddingsReducer.class);
-//		job2.setOutputKeyClass(StringDepLabelPair.class);
-//		job2.setOutputValueClass(LongWritable.class);
 
-		job3.setNumReduceTasks(1);
-
-		FileInputFormat.addInputPath(job3, new Path(args[0] + "Step2Output-CorpusPairFilter"));
 		FileOutputFormat.setOutputPath(job3, new Path(args[0] + "Step3Output-BuildCoVectors"));
 
 		System.out.println("Done building!\n" +
-				"Starting job 3 - BuildCoVectors...");
+		                   "Starting job 3 - BuildCoVectors...");
 		System.out.println("Job 3 - BuildCoVectors: completed with success status: " + (jobStatus = job3.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;

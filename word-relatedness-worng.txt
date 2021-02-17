@@ -2451,6 +2451,7 @@ pub	edifice	True
 pub	institution	True
 pub	structure	True
 pub	alcohol	False
+pub	bar	False
 pub	barman	False
 pub	beer	False
 pub	bench	False
@@ -2558,6 +2559,7 @@ restaurant	building	True
 restaurant	construction	True
 restaurant	edifice	True
 restaurant	structure	True
+restaurant	bar	False
 restaurant	beverage	False
 restaurant	bottle	False
 restaurant	brick	False
@@ -3999,6 +4001,8 @@ bag	leather	False
 bag	outside	False
 bag	paper	False
 bag	plastic	False
+bag	pouch	False
+bag	wallet	False
 bag	Presbyterian	False
 bag	admission	False
 bag	cent	False
@@ -4049,6 +4053,7 @@ bottle	cap	False
 bottle	content	False
 bottle	cork	False
 bottle	exterior	False
+bottle	glass	False
 bottle	inside	False
 bottle	interior	False
 bottle	label	False
@@ -4127,6 +4132,7 @@ bowl	content	False
 bowl	edge	False
 bowl	exterior	False
 bowl	food	False
+bowl	glass	False
 bowl	inside	False
 bowl	interior	False
 bowl	liquid	False
@@ -4269,6 +4275,7 @@ jar	cookie	False
 jar	edge	False
 jar	exterior	False
 jar	food	False
+jar	glass	False
 jar	inside	False
 jar	interior	False
 jar	jam	False
@@ -13587,6 +13594,7 @@ cannon	bomb	False
 cannon	bow	False
 cannon	dagger	False
 cannon	grenade	False
+cannon	gun	False
 cannon	hatchet	False
 cannon	kalashnikov	False
 cannon	knife	False
@@ -13936,6 +13944,7 @@ missile	pike	False
 missile	pistol	False
 missile	revolver	False
 missile	rifle	False
+missile	rocket	False
 missile	shotgun	False
 missile	spear	False
 missile	sword	False
@@ -13997,6 +14006,7 @@ musket	bow	False
 musket	cannon	False
 musket	dagger	False
 musket	grenade	False
+musket	gun	False
 musket	hatchet	False
 musket	kalashnikov	False
 musket	knife	False
@@ -14102,6 +14112,7 @@ pistol	bow	False
 pistol	cannon	False
 pistol	dagger	False
 pistol	grenade	False
+pistol	gun	False
 pistol	hatchet	False
 pistol	kalashnikov	False
 pistol	knife	False
@@ -14196,12 +14207,14 @@ revolver	bow	False
 revolver	cannon	False
 revolver	dagger	False
 revolver	grenade	False
+revolver	gun	False
 revolver	hatchet	False
 revolver	kalashnikov	False
 revolver	knife	False
 revolver	missile	False
 revolver	musket	False
 revolver	pike	False
+revolver	pistol	False
 revolver	rifle	False
 revolver	shotgun	False
 revolver	spear	False
@@ -14292,6 +14305,7 @@ rifle	bow	False
 rifle	cannon	False
 rifle	dagger	False
 rifle	grenade	False
+rifle	gun	False
 rifle	hatchet	False
 rifle	kalashnikov	False
 rifle	knife	False

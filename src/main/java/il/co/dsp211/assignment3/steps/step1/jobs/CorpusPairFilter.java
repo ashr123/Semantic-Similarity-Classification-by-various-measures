@@ -61,9 +61,9 @@ public class CorpusPairFilter
 		 * <p>IMPORTANT1: need to execute with only 1 reducer in order to maintain valid counter</p>
 		 * <p>IMPORTANT2: Use TextOutputFormat!!!</p>
 		 *
-		 * @param key     ⟨number,
+		 * @param key     ⟨count(f),
 		 * @param values  ⟨word, dep label⟩⟩
-		 * @param context ⟨⟨word, dep label⟩, vector index⟩
+		 * @param context ⟨⟨word, dep label⟩, vector index, count(f)⟩
 		 */
 		@Override
 		protected void reduce(LongWritable key, Iterable<StringStringPair> values, Context context)
@@ -73,7 +73,7 @@ public class CorpusPairFilter
 			for (; counter < 1100 && iterator.hasNext(); counter++)
 			{
 				// For next step, we'll find the vector index by ⟨word, dep label⟩ (value = vector index)
-				stringBuilder.append(iterator.next()).append('\t').append(counter - 100).append('\n');
+				stringBuilder.append(iterator.next()).append('\t').append(counter - 100).append('\t').append(key.get()).append('\n');
 			}
 		}
 
@@ -86,37 +86,5 @@ public class CorpusPairFilter
 				out.writeUTF(stringBuilder.toString());
 			}
 		}
-
-//		private void temp(Context context) throws IOException
-//		{
-//			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(BuildCoVectors.VectorRecordFilterMapper.class.getResourceAsStream("word-relatedness.txt"))))
-//			{
-//				GOLDEN_STANDARD_WORDS = bufferedReader.lines().parallel()
-//						.map(line -> line.split("\t"))
-//						.flatMap(strings -> Stream.of(strings[0], strings[1]))
-//						.collect(Collectors.toSet());
-//			}
-
-
-//			FileSystem fileSystem = FileSystem.get(context.getConfiguration());
-//// Check if the file already exists
-//			//			if (fileSystem.exists(path)) {
-////				System.out.println("File " + dest + " already exists");
-////				return;
-////			}
-//// Create a new file and write data to it.
-//			FSDataOutputStream out = fileSystem.create(new Path("featurs.ext"));
-//
-//			InputStream in = new BufferedInputStream(new FileInputStream(new File(source)));
-//			byte[] b = new byte[1024];
-//			int numBytes = 0;
-//			while ((numBytes = in.read(b)) > 0) {
-//				out.write(b, 0, numBytes);
-//			}
-//// Close all the file descripters
-//			in.close();
-//			out.close();
-//			fileSystem.close();
-//		}
 	}
 }
