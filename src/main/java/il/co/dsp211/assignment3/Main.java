@@ -54,8 +54,8 @@ public class Main
 						.withInstances(new JobFlowInstancesConfig()
 								.withInstanceCount(Integer.parseInt(properties.getProperty("instanceCount")))
 								.withKeepJobFlowAliveWhenNoSteps(false)
-								.withMasterInstanceType(InstanceType.M5Xlarge.toString())
-								.withSlaveInstanceType(InstanceType.M5Xlarge.toString())))
+								.withMasterInstanceType(InstanceType.C5Xlarge.toString())
+								.withSlaveInstanceType(InstanceType.C5Xlarge.toString())))
 				.getJobFlowId());
 	}
 }

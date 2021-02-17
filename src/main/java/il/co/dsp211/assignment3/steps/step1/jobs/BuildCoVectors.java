@@ -126,16 +126,13 @@ public class BuildCoVectors
 			final Iterator<StringStringPair> iterator = values.iterator();
 
 			long countLittleL = -1;
-			if (iterator.hasNext())
-			{
-				countLittleL = Long.parseLong(iterator.next().getDepLabel());
-			}
 
 			// Calc Vector 5
-			while (iterator.hasNext())
-			{
-				StringStringPair next = iterator.next();
-				if (map.containsKey(next))
+			for (final StringStringPair next : values) {
+				if (next.getWord().isEmpty()) {
+					countLittleL = Long.parseLong(iterator.next().getDepLabel());
+				}
+				else if (map.containsKey(next))
 				{
 					final short i = map.get(next).getKey();
 					vector5[i].set(vector5[i].get() + 1);
