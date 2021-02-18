@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.DoubleFunction;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -65,8 +66,8 @@ public class BuildCoVectors
 	{
 		/**
 		 * @param key     ⟨⟨word, dep label⟩,
-		 * @param value   count(f)⟩
-		 * @param context ⟨word, ⟨"", count(f) (as string)⟩⟩ ????????
+		 * @param value   count(l)⟩
+		 * @param context ⟨word, ⟨"Count_L_Label", count(l) (as string)⟩⟩ ????????
 		 */
 		@Override
 		protected void map(StringStringPair key, LongWritable value, Context context) throws IOException, InterruptedException
@@ -97,7 +98,7 @@ public class BuildCoVectors
 
 		/**
 		 * @param key     ⟨word,
-		 * @param values  [⟨word, dep label⟩ | ⟨"", count(f) (as string)⟩]⟩
+		 * @param values  [⟨word, dep label⟩ | ⟨"Count_L_Label", count(l) (as string)⟩]⟩
 		 * @param context
 		 */
 		@Override
@@ -135,12 +136,14 @@ public class BuildCoVectors
 					final double
 							probLittleL = 1.0 * countLittleL / counterFL,
 							probLittleF = 1.0 * map.get(next).getValue() / counterFL;
+//					vector6[i].set(1.5);
+//					vector7[i].set(4.5);
+//					vector8[i].set(1.0 * 15 / 3);
 					vector6[i].set(1.0 * vector5[i].get() / countLittleL);
 					vector7[i].set(Math.log10((1.0 * vector5[i].get()) / counterFL / (probLittleL * probLittleF)) / Math.log10(2));
 					vector8[i].set((1.0 * vector5[i].get() / counterFL - probLittleL * probLittleF) / Math.sqrt(probLittleL * probLittleF));
 				}
 			context.write(key, new VectorsQuadruple(vector5, vector6, vector7, vector8));
-//			context.write(key, new ArrayWritable(LongWritable.class, vector5));
 		}
 	}
 }
