@@ -56,14 +56,15 @@ public class EMR
 		                   "Starting job 1 - Corpus Word Count...");
 		System.out.println("Job 1 - Corpus Word Count: completed with success status: " + (jobStatus = job1.waitForCompletion(true)) + "!");
 
-		conf.setLong("CounterFL", job1.getCounters().findCounter(NCounter.N_COUNTER).getValue());
-
 		if (!jobStatus)
 			return;
 
 		//--------------------------------------------------------------------------------------------------------------
 
 		System.out.println("Building job 2 - CorpusPairFilter...");
+
+		conf.setLong("CounterFL", job1.getCounters().findCounter(NCounter.N_COUNTER).getValue());
+
 		Job job2 = Job.getInstance(conf);
 		job2.setJarByClass(CorpusPairFilter.class);
 
