@@ -8,7 +8,6 @@ import il.co.dsp211.assignment3.steps.utils.StringStringPair;
 import il.co.dsp211.assignment3.steps.utils.VectorsQuadruple;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -28,8 +27,8 @@ public class EMR
 		final Configuration conf = new Configuration();
 
 		// TODO: TESTING
-		long milliSeconds = 1000*60*60; //  default is 600000, likewise can give any value)
-		conf.setLong("mapred.task.timeout", milliSeconds);
+//		long milliSeconds = 1000*60*60; //  default is 600000, likewise can give any value)
+//		conf.setLong("mapred.task.timeout", milliSeconds);
 
 		System.out.println("Building job 1 - Corpus Word Count...");
 
@@ -57,14 +56,15 @@ public class EMR
 		                   "Starting job 1 - Corpus Word Count...");
 		System.out.println("Job 1 - Corpus Word Count: completed with success status: " + (jobStatus = job1.waitForCompletion(true)) + "!");
 
-		conf.setLong("CounterFL", job1.getCounters().findCounter(NCounter.N_COUNTER).getValue());
-
 		if (!jobStatus)
 			return;
 
 		//--------------------------------------------------------------------------------------------------------------
 
 		System.out.println("Building job 2 - CorpusPairFilter...");
+
+		conf.setLong("CounterFL", job1.getCounters().findCounter(NCounter.N_COUNTER).getValue());
+
 		Job job2 = Job.getInstance(conf);
 		job2.setJarByClass(CorpusPairFilter.class);
 
@@ -95,6 +95,7 @@ public class EMR
 		//--------------------------------------------------------------------------------------------------------------
 
 		System.out.println("Building job 3 - BuildCoVectors...");
+		conf.set("goldenStandardFileName", args[2]);
 		Job job3 = Job.getInstance(conf);
 		job3.setJarByClass(BuildCoVectors.class);
 

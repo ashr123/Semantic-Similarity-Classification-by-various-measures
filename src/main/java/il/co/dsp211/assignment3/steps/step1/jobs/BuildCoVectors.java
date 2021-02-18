@@ -15,7 +15,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.DoubleFunction;
@@ -32,7 +31,7 @@ public class BuildCoVectors
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException
 		{
-			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream("word-relatedness.txt"))))
+			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(context.getConfiguration().get("goldenStandardFileName")))))
 			{
 				goldenStandardWords = bufferedReader.lines().parallel()
 						.map(line -> line.split("\t"))
