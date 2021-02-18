@@ -32,7 +32,7 @@ public class CorpusWordCount
 				if (token.length != 4)
 					continue;
 				context.write(new StringStringPair(token[0], token[2]), ONE); // count(f)
-				context.write(new StringStringPair(token[0], ""), ONE); // count(l)
+				context.write(new StringStringPair(token[0], "Count_L_Label"), ONE); // count(l)
 			}
 		}
 	}

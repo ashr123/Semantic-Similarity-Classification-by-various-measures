@@ -24,7 +24,7 @@ public class CorpusPairFilter
 		@Override
 		protected void map(StringStringPair key, LongWritable value, Context context) throws IOException, InterruptedException
 		{
-			if (!key.getDepLabel().isEmpty())
+			if (!key.getDepLabel().equals("Count_L_Label"))
 				context.write(value, key);
 		}
 	}

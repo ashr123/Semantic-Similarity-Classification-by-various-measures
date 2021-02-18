@@ -71,8 +71,8 @@ public class BuildCoVectors
 		@Override
 		protected void map(StringStringPair key, LongWritable value, Context context) throws IOException, InterruptedException
 		{
-			if (key.getDepLabel().isEmpty())
-				context.write(new Text(key.getWord()), new StringStringPair("", value.toString()));
+			if (key.getDepLabel().equals("Count_L_Label"))
+				context.write(new Text(key.getWord()), new StringStringPair("Count_L_Label", value.toString()));
 		}
 	}
 
@@ -117,14 +117,15 @@ public class BuildCoVectors
 			long countLittleL = -1;
 
 			// Calc Vector 5
-			for (final StringStringPair next : values)
-				if (next.getWord().isEmpty())
+			for (final StringStringPair next : values) {
+				if (next.getWord().equals("Count_L_Label")) {
 					countLittleL = Long.parseLong(next.getDepLabel());
-				else if (map.containsKey(next))
-				{
+				}
+				else if (map.containsKey(next)) {
 					final short i = map.get(next).getKey();
 					vector5[i].set(vector5[i].get() + 1);
 				}
+			}
 
 			// Calc Vectors 6-8
 			for (final StringStringPair next : values)
