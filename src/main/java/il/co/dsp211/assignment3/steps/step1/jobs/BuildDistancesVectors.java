@@ -46,9 +46,13 @@ public class BuildDistancesVectors
 		{
 			context.write(new StringBooleanPair(key.toString(), false), new StringVectorsQuadruplePair("", value));
 
-			for (String neighbor : goldenStandard.get(key.toString()).keySet())
+			// TODO: Check why that's possible
+			if (goldenStandard.containsKey(key.toString()))
 			{
-				context.write(new StringBooleanPair(neighbor, true), new StringVectorsQuadruplePair(key.toString(), value));
+				for (String neighbor : goldenStandard.get(key.toString()).keySet())
+				{
+					context.write(new StringBooleanPair(neighbor, true), new StringVectorsQuadruplePair(key.toString(), value));
+				}
 			}
 		}
 	}
