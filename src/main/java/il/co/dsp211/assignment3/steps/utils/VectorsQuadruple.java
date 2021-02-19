@@ -152,20 +152,23 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 	@Override
 	public void readFields(DataInput in) throws IOException
 	{
-		ArrayWritable temp = new ArrayWritable(LongWritable.class);
+		final ArrayWritable longTemp = new ArrayWritable(LongWritable.class);
+		longTemp.readFields(in);
+		vector5 = new LongWritable[longTemp.get().length];
+		Arrays.parallelSetAll(vector5, i -> longTemp.get()[i]);
 
-		temp.readFields(in);
-		vector5 = (LongWritable[]) temp.get();
+		final ArrayWritable doubleTemp = new ArrayWritable(DoubleWritable.class);
+		doubleTemp.readFields(in);
+		vector6 = new DoubleWritable[doubleTemp.get().length];
+		Arrays.parallelSetAll(vector6, i -> doubleTemp.get()[i]);
 
-		temp = new ArrayWritable(DoubleWritable.class);
-		temp.readFields(in);
-		vector6 = (DoubleWritable[]) temp.get();
+		doubleTemp.readFields(in);
+		vector7 = new DoubleWritable[doubleTemp.get().length];
+		Arrays.parallelSetAll(vector7, i -> doubleTemp.get()[i]);
 
-		temp.readFields(in);
-		vector7 = (DoubleWritable[]) temp.get();
-
-		temp.readFields(in);
-		vector8 = (DoubleWritable[]) temp.get();
+		doubleTemp.readFields(in);
+		vector8 = new DoubleWritable[doubleTemp.get().length];
+		Arrays.parallelSetAll(vector8, i -> doubleTemp.get()[i]);
 	}
 
 	@Override
