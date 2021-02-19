@@ -91,8 +91,6 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 				vector7 = new DoubleWritable[vector7Strings.length],
 				vector8 = new DoubleWritable[vector8Strings.length];
 
-
-
 		Arrays.parallelSetAll(vector6, i -> new DoubleWritable(Double.parseDouble(vector6Strings[i])));
 		Arrays.parallelSetAll(vector7, i -> new DoubleWritable(Double.parseDouble(vector7Strings[i])));
 		Arrays.parallelSetAll(vector8, i -> new DoubleWritable(Double.parseDouble(vector8Strings[i])));
