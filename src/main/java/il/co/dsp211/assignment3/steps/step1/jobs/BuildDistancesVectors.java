@@ -14,17 +14,21 @@ import org.apache.hadoop.mapreduce.Reducer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class BuildDistancesVectors {
-	public static class BuildMatchingCoVectorsMapper extends Mapper<Text, VectorsQuadruple, StringBooleanPair, StringVectorsQuadruplePair> {
+public class BuildDistancesVectors
+{
+	public static class BuildMatchingCoVectorsMapper extends Mapper<Text, VectorsQuadruple, StringBooleanPair, StringVectorsQuadruplePair>
+	{
 		private Map<String, Map<String, Boolean>> goldenStandard;
 
 		@Override
-		protected void setup(Context context) throws IOException, InterruptedException {
-			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(context.getConfiguration().get("goldenStandardFileName"))))) {
+		protected void setup(Context context) throws IOException, InterruptedException
+		{
+			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(context.getConfiguration().get("goldenStandardFileName")))))
+			{
 				goldenStandard = bufferedReader.lines()
 						.map(line -> line.split("\t"))
 						.collect(Collectors.groupingBy(strings -> strings[0],
@@ -38,17 +42,20 @@ public class BuildDistancesVectors {
 		 * @param context ⟨⟨word1, isNotFirst⟩, ⟨word2, VectorsQuadruple⟩⟩
 		 */
 		@Override
-		protected void map(Text key, VectorsQuadruple value, Context context) throws IOException, InterruptedException {
+		protected void map(Text key, VectorsQuadruple value, Context context) throws IOException, InterruptedException
+		{
 			context.write(new StringBooleanPair(key.toString(), false), new StringVectorsQuadruplePair("", value));
 
-			for (String neighbor : goldenStandard.get(key.toString()).keySet()) {
+			for (String neighbor : goldenStandard.get(key.toString()).keySet())
+			{
 				context.write(new StringBooleanPair(neighbor, true), new StringVectorsQuadruplePair(key.toString(), value));
 			}
 		}
 	}
 
-	public static class tempNameReducer extends Reducer<StringBooleanPair, StringVectorsQuadruplePair, StringStringPair, ArrayWritable> {
-		VectorsQuadruple mainWordVectors = null;
+	public static class tempNameReducer extends Reducer<StringBooleanPair, StringVectorsQuadruplePair, StringStringPair, ArrayWritable>
+	{
+		private VectorsQuadruple mainWordVectors = null;
 
 		/**
 		 * @param key     ⟨⟨word1, isNotFirst⟩,
@@ -56,63 +63,129 @@ public class BuildDistancesVectors {
 		 * @param context ⟨⟨word1, word2⟩, 24-Vector⟩
 		 */
 		@Override
-		protected void reduce(StringBooleanPair key, Iterable<StringVectorsQuadruplePair> values, Context context) throws IOException, InterruptedException {
-			if (key.isValue()) {
-				if (mainWordVectors != null) {
-					for (StringVectorsQuadruplePair next : values) {
-						final DoubleWritable[] vector24D = new DoubleWritable[24];
+		protected void reduce(StringBooleanPair key, Iterable<StringVectorsQuadruplePair> values, Context context) throws IOException, InterruptedException
+		{
+			if (key.isValue())
+			{
+				if (mainWordVectors != null)
+				{
+					for (StringVectorsQuadruplePair next : values)
+					{
+						final LongWritable[]
+								vector5_word1 = mainWordVectors.getVector5(),
+								vector5_word2 = next.getValue().getVector5();
+						final DoubleWritable[]
+								vector6_word1 = mainWordVectors.getVector6(),
+								vector6_word2 = next.getValue().getVector6(),
+								vector7_word1 = mainWordVectors.getVector7(),
+								vector7_word2 = next.getValue().getVector7(),
+								vector8_word1 = mainWordVectors.getVector8(),
+								vector8_word2 = next.getValue().getVector8(),
+								vector24D = new DoubleWritable[24];
 
-						LongWritable[] vector5_word1 = mainWordVectors.getVector5();
-						LongWritable[] vector5_word2 = next.getValue().getVector5();
-						DoubleWritable[] vector6_word1 = mainWordVectors.getVector6();
-						DoubleWritable[] vector6_word2 = next.getValue().getVector6();
-						DoubleWritable[] vector7_word1 = mainWordVectors.getVector7();
-						DoubleWritable[] vector7_word2 = next.getValue().getVector7();
-						DoubleWritable[] vector8_word1 = mainWordVectors.getVector8();
-						DoubleWritable[] vector8_word2 = next.getValue().getVector8();
+						final double[]
+								// DistManhattan - Init variables
+								sumArrayManhattanTemp = new double[4],
+								// DistEuclidean - Init variables
+								sumArrayEuclideanTemp = new double[4],
+								// simCosine - Init variables
+								sumMulTemp = new double[4],
+								sumV1SquareTemp = new double[4],
+								sumV2SquareTemp = new double[4],
+								// simJaccard - Init variables
+								sumMinTemp = new double[4],
+								sumMaxTemp = new double[4],
+								//simDice - Init variables
+								sumAddTemp = new double[4],
+								// simJS - Init variables
+								sumD1Temp = new double[4],
+								sumD2Temp = new double[4];
 
-						// Dist - Manhattan - Init variables
-						double[] sumArrayManhattan = new double[4];
+						IntStream.range(0, vector5_word1.length).parallel().forEach(i ->
+						{
+							// Dist - Manhattan - Calc ✓
+							sumArrayManhattanTemp[0] += Math.abs(vector5_word1[i].get() - vector5_word2[i].get());
+							sumArrayManhattanTemp[1] += Math.abs(vector6_word1[i].get() - vector6_word2[i].get());
+							sumArrayManhattanTemp[2] += Math.abs(vector7_word1[i].get() - vector7_word2[i].get());
+							sumArrayManhattanTemp[3] += Math.abs(vector8_word1[i].get() - vector8_word2[i].get());
 
-						// Dist - Euclidean - Init variables
-						double[] sumArrayEuclidean = new double[4];
+							// Dist - Euclidean - Calc ✓
+							sumArrayEuclideanTemp[0] += 1 << (vector5_word1[i].get() - vector5_word2[i].get());
+							sumArrayEuclideanTemp[1] += Math.pow(vector6_word1[i].get() - vector6_word2[i].get(), 2);
+							sumArrayEuclideanTemp[2] += Math.pow(vector7_word1[i].get() - vector7_word2[i].get(), 2);
+							sumArrayEuclideanTemp[3] += Math.pow(vector8_word1[i].get() - vector8_word2[i].get(), 2);
 
-						for (int i = 0; i < 1000; i++) {
-							// Dist - Manhattan - Calc
-							sumArrayManhattan[0] += Math.abs(vector5_word1[i].get() - vector5_word2[i].get());
-							sumArrayManhattan[1] += Math.abs(vector6_word1[i].get() - vector6_word2[i].get());
-							sumArrayManhattan[2] += Math.abs(vector7_word1[i].get() - vector7_word2[i].get());
-							sumArrayManhattan[3] += Math.abs(vector8_word1[i].get() - vector8_word2[i].get());
+							// simCosine
+							sumMulTemp[0] += vector5_word1[i].get() * vector5_word2[i].get();
+							sumMulTemp[1] += vector6_word1[i].get() * vector6_word2[i].get();
+							sumMulTemp[2] += vector7_word1[i].get() * vector7_word2[i].get();
+							sumMulTemp[3] += vector8_word1[i].get() * vector8_word2[i].get();
 
-							// Dist - Euclidean - Calc
-							sumArrayEuclidean[0] += 1 << (vector5_word1[i].get() - vector5_word2[i].get());
-							sumArrayEuclidean[1] += Math.pow(vector6_word1[i].get() - vector6_word2[i].get(), 2);
-							sumArrayEuclidean[2] += Math.pow(vector7_word1[i].get() - vector7_word2[i].get(), 2);
-							sumArrayEuclidean[3] += Math.pow(vector8_word1[i].get() - vector8_word2[i].get(), 2);
-						}
+							sumV1SquareTemp[0] += 1 << vector5_word1[i].get();
+							sumV1SquareTemp[1] += Math.pow(vector6_word1[i].get(), 2);
+							sumV1SquareTemp[2] += Math.pow(vector7_word1[i].get(), 2);
+							sumV1SquareTemp[3] += Math.pow(vector8_word1[i].get(), 2);
 
-						// Dist - Manhattan - Assign results
-						vector24D[] = new DoubleWritable(sumArrayManhattan[0]);
-						vector24D[] = new DoubleWritable(sumArrayManhattan[1]);
-						vector24D[] = new DoubleWritable(sumArrayManhattan[2]);
-						vector24D[] = new DoubleWritable(sumArrayManhattan[3]);
+							sumV2SquareTemp[0] += 1 << vector5_word2[i].get();
+							sumV2SquareTemp[1] += Math.pow(vector6_word2[i].get(), 2);
+							sumV2SquareTemp[2] += Math.pow(vector7_word2[i].get(), 2);
+							sumV2SquareTemp[3] += Math.pow(vector8_word2[i].get(), 2);
 
-						// Dist - Euclidean - Assign results
-						vector24D[] = new DoubleWritable(Math.sqrt(sumArrayEuclidean[0]));
-						vector24D[] = new DoubleWritable(sumArrayEuclidean[1]);
-						vector24D[] = new DoubleWritable(sumArrayEuclidean[2]);
-						vector24D[] = new DoubleWritable(sumArrayEuclidean[3]);
+							// simJaccard
+							sumMinTemp[0] += Math.min(vector5_word1[i].get(), vector5_word2[i].get());
+							sumMinTemp[1] += Math.min(vector6_word1[i].get(), vector6_word2[i].get());
+							sumMinTemp[2] += Math.min(vector7_word1[i].get(), vector7_word2[i].get());
+							sumMinTemp[3] += Math.min(vector8_word1[i].get(), vector8_word2[i].get());
 
-						}
+							sumMaxTemp[0] += Math.max(vector5_word1[i].get(), vector5_word2[i].get());
+							sumMaxTemp[1] += Math.max(vector6_word1[i].get(), vector6_word2[i].get());
+							sumMaxTemp[2] += Math.max(vector7_word1[i].get(), vector7_word2[i].get());
+							sumMaxTemp[3] += Math.max(vector8_word1[i].get(), vector8_word2[i].get());
+
+							// simDice
+							sumAddTemp[0] += vector5_word1[i].get() + vector5_word2[i].get();
+							sumAddTemp[1] += vector6_word1[i].get() + vector6_word2[i].get();
+							sumAddTemp[2] += vector7_word1[i].get() + vector7_word2[i].get();
+							sumAddTemp[3] += vector8_word1[i].get() + vector8_word2[i].get();
+
+							// simJS
+							sumD1Temp[0] += vector5_word1[i].get() * Math.log(vector5_word1[i].get() / (sumAddTemp[0] / 2));
+							sumD1Temp[1] += vector6_word1[i].get() * Math.log(vector6_word1[i].get() / (sumAddTemp[1] / 2));
+							sumD1Temp[2] += vector7_word1[i].get() * Math.log(vector7_word1[i].get() / (sumAddTemp[2] / 2));
+							sumD1Temp[3] += vector8_word1[i].get() * Math.log(vector8_word1[i].get() / (sumAddTemp[3] / 2));
+
+							sumD2Temp[0] += vector5_word2[i].get() * Math.log(vector5_word2[i].get() / (sumAddTemp[0] / 2));
+							sumD2Temp[1] += vector6_word2[i].get() * Math.log(vector6_word2[i].get() / (sumAddTemp[1] / 2));
+							sumD2Temp[2] += vector7_word2[i].get() * Math.log(vector7_word2[i].get() / (sumAddTemp[2] / 2));
+							sumD2Temp[3] += vector8_word2[i].get() * Math.log(vector8_word2[i].get() / (sumAddTemp[3] / 2));
+						});
+
+						IntStream.range(0, 4).parallel().forEach(i ->
+						{
+							// DistManhattan - results
+							vector24D[i * 6] = new DoubleWritable(sumArrayManhattanTemp[i]);
+							// DistEuclidean - results
+							vector24D[i * 6 + 1] = new DoubleWritable(Math.sqrt(sumArrayEuclideanTemp[i]));
+							// simCosine - results
+							vector24D[i * 6 + 2] = new DoubleWritable(sumMulTemp[i] / (Math.sqrt(sumV1SquareTemp[i]) * Math.sqrt(sumV2SquareTemp[i])));
+							// simJaccard - results
+							vector24D[i * 6 + 3] = new DoubleWritable(sumMinTemp[i] / sumMaxTemp[i]);
+							// simDice - results
+							vector24D[i * 6 + 4] = new DoubleWritable(2 * sumMinTemp[i] / sumAddTemp[i]);
+							// simJS - results
+							vector24D[i * 6 + 5] = new DoubleWritable(sumD1Temp[i] + sumD2Temp[i]);
+						});
 						context.write(new StringStringPair(key.getKey(), next.getKey()), new ArrayWritable(DoubleWritable.class, vector24D));
 					}
-				} else {
+				} else
 					throw new IllegalStateException("ERROR: mainWordVectors should be initialized!");
-				}
-			} else {
+			} else
+			{
 				int count = 0;
-				for (StringVectorsQuadruplePair next : values) {
-					if (count > 0) {
+				for (StringVectorsQuadruplePair next : values)
+				{
+					if (count > 0)
+					{
 						throw new IllegalStateException("ERROR: Should not have more than 1 record like: ⟨⟨word1, isNotFirst=false⟩, ⟨word2=\"\", VectorsQuadruple⟩⟩");
 					}
 					count++;
