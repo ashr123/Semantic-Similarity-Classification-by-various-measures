@@ -8,42 +8,42 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Objects;
 
-public class StringBooleanPair implements WritableComparable<StringBooleanPair>
+public class StringVectorsQuadruplePair implements WritableComparable<StringVectorsQuadruplePair>
 {
 	private String key;
-	private boolean value;
+	private VectorsQuadruple value;
 
-	public StringBooleanPair()
+	public StringVectorsQuadruplePair()
 	{
 	}
 
-	public StringBooleanPair(String key, boolean value)
+	public StringVectorsQuadruplePair(String key, VectorsQuadruple value)
 	{
 		this.key = key;
 		this.value = value;
 	}
 
-	public static StringBooleanPair of(String string)
+	public static StringVectorsQuadruplePair of(String string)
 	{
-		final String[] values = string.split("🤠");
-		return new StringBooleanPair(values[0], Boolean.parseBoolean(values[1]));
+		final String[] values = string.split("🤠🤠");
+		return new StringVectorsQuadruplePair(values[0], VectorsQuadruple.of(values[1]));
 	}
 
 	@Override
 	public void write(DataOutput out) throws IOException
 	{
 		Text.writeString(out, key);
-		out.writeBoolean(value);
+		value.write(out);
 	}
 
 	@Override
 	public void readFields(DataInput in) throws IOException
 	{
 		key = Text.readString(in);
-		value = in.readBoolean();
+		value = VectorsQuadruple.read(in);
 	}
 
-	public boolean isValue()
+	public VectorsQuadruple getValue()
 	{
 		return value;
 	}
@@ -58,9 +58,9 @@ public class StringBooleanPair implements WritableComparable<StringBooleanPair>
 	{
 		if (this == o)
 			return true;
-		if (!(o instanceof StringBooleanPair))
+		if (!(o instanceof StringVectorsQuadruplePair))
 			return false;
-		StringBooleanPair that = (StringBooleanPair) o;
+		StringVectorsQuadruplePair that = (StringVectorsQuadruplePair) o;
 		return value == that.value &&
 		       key.equals(that.key);
 	}
@@ -74,13 +74,13 @@ public class StringBooleanPair implements WritableComparable<StringBooleanPair>
 	@Override
 	public String toString()
 	{
-		return key + "🤠" + value;
+		return key + "🤠🤠" + value;
 	}
 
 	@Override
-	public int compareTo(StringBooleanPair o)
+	public int compareTo(StringVectorsQuadruplePair o)
 	{
 		final int valueCompare = key.compareTo(o.key);
-		return valueCompare != 0 ? valueCompare : Boolean.compare(value, o.value);
+		return valueCompare != 0 ? valueCompare : value.compareTo(o.value);
 	}
 }

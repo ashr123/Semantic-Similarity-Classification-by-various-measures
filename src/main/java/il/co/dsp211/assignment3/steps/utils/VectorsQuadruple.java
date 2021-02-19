@@ -75,7 +75,7 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 		}
 	}
 
-	private static VectorsQuadruple of(String string)
+	public static VectorsQuadruple of(String string)
 	{
 		final String[] values = string.split("🤠"),
 				vector5Strings = values[0].split("#"),
@@ -91,11 +91,20 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 				vector7 = new DoubleWritable[vector7Strings.length],
 				vector8 = new DoubleWritable[vector8Strings.length];
 
+
+
 		Arrays.parallelSetAll(vector6, i -> new DoubleWritable(Double.parseDouble(vector6Strings[i])));
 		Arrays.parallelSetAll(vector7, i -> new DoubleWritable(Double.parseDouble(vector7Strings[i])));
 		Arrays.parallelSetAll(vector8, i -> new DoubleWritable(Double.parseDouble(vector8Strings[i])));
 
 		return new VectorsQuadruple(vector5, vector6, vector7, vector8);
+	}
+
+	public static VectorsQuadruple read(DataInput in) throws IOException
+	{
+		final VectorsQuadruple vectorsQuadruple = new VectorsQuadruple();
+		vectorsQuadruple.readFields(in);
+		return vectorsQuadruple;
 	}
 
 	public LongWritable[] getVector5()
