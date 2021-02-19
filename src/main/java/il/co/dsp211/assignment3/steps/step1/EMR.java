@@ -1,13 +1,13 @@
 package il.co.dsp211.assignment3.steps.step1;
 
 import il.co.dsp211.assignment3.steps.step1.jobs.BuildCoVectors;
+import il.co.dsp211.assignment3.steps.step1.jobs.BuildDistancesVectors;
 import il.co.dsp211.assignment3.steps.step1.jobs.CorpusPairFilter;
 import il.co.dsp211.assignment3.steps.step1.jobs.CorpusWordCount;
-import il.co.dsp211.assignment3.steps.utils.NCounter;
-import il.co.dsp211.assignment3.steps.utils.StringStringPair;
-import il.co.dsp211.assignment3.steps.utils.VectorsQuadruple;
+import il.co.dsp211.assignment3.steps.utils.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -80,8 +80,8 @@ public class EMR
 		job2.setSortComparatorClass(LongWritable.DecreasingComparator.class);
 
 		job2.setReducerClass(CorpusPairFilter.FilterTopPairsReducer.class);
-//		job2.setOutputKeyClass(StringDepLabelPair.class);
-//		job2.setOutputValueClass(LongWritable.class);
+//		job2.setOutputKeyClass(Void.class);
+//		job2.setOutputValueClass(Void.class);
 
 		job2.setNumReduceTasks(1);
 
@@ -98,21 +98,19 @@ public class EMR
 
 		System.out.println("Building job 3 - BuildCoVectors...");
 		conf.set("goldenStandardFileName", args[2]);
+
 		Job job3 = Job.getInstance(conf);
 		job3.setJarByClass(BuildCoVectors.class);
 
-//		FileInputFormat.addInputPath(job3, corpusPath); // TODO delete
-//		job3.setInputFormatClass(SequenceFileInputFormat.class); // TODO delete
-//		job3.setMapperClass(BuildCoVectors.VectorRecordFilterMapper.class); // TODO delete
+		job3.setInputFormatClass(SequenceFileInputFormat.class);
+		job3.setOutputFormatClass(SequenceFileOutputFormat.class);
 
 		MultipleInputs.addInputPath(job3, corpusPath, SequenceFileInputFormat.class, BuildCoVectors.VectorRecordFilterMapper.class);
 		MultipleInputs.addInputPath(job3, new Path(args[0] + "Step1Output-CorpusWordCount"), SequenceFileInputFormat.class, BuildCoVectors.CounterLittleLMapper.class);
 		job3.setMapOutputKeyClass(Text.class);
-		job3.setMapOutputValueClass(StringStringPair.class); // TODO change
-//		job3.setOutputFormatClass(SequenceFileOutputFormat.class); TODO uncomment
+		job3.setMapOutputValueClass(StringStringPair.class);
 
 		job3.setReducerClass(BuildCoVectors.CalculateEmbeddingsReducer.class);
-//		job3.setNumReduceTasks(0); // TODO delete
 		job3.setOutputKeyClass(Text.class);
 		job3.setOutputValueClass(VectorsQuadruple.class);
 
@@ -126,6 +124,35 @@ public class EMR
 			return;
 
 		//--------------------------------------------------------------------------------------------------------------
+
+		System.out.println("Building job 4 - BuildDistancesVectors...");
+//		conf.set("goldenStandardFileName", args[2]); // TODO: Keep or Remove ???
+
+		Job job4 = Job.getInstance(conf);
+		job4.setJarByClass(BuildDistancesVectors.class);
+
+		job4.setInputFormatClass(SequenceFileInputFormat.class);
+		job4.setOutputFormatClass(SequenceFileOutputFormat.class);
+
+		job4.setMapperClass(BuildDistancesVectors.BuildMatchingCoVectorsMapper.class);
+		job4.setMapOutputKeyClass(StringBooleanPair.class);
+		job4.setMapOutputValueClass(StringVectorsQuadruplePair.class);
+
+		job4.setReducerClass(BuildDistancesVectors.CreatePairDistancesVectorReducer.class);
+		job4.setOutputKeyClass(StringStringPair.class);
+		job4.setOutputValueClass(ArrayWritable.class);
+
+		FileInputFormat.addInputPath(job4, new Path(args[0] + "Step3Output-BuildCoVectors"));
+		FileOutputFormat.setOutputPath(job4, new Path(args[0] + "Step4Output-BuildDistancesVectors"));
+
+		System.out.println("Done building!\n" +
+				"Starting job 4 - BuildDistancesVectors...");
+		System.out.println("Job 4 - BuildDistancesVectors: completed with success status: " + (jobStatus = job4.waitForCompletion(true)) + "!");
+		if (!jobStatus)
+			return;
+
+		//--------------------------------------------------------------------------------------------------------------
+
 
 		/*
 		System.out.println("Building job 5...");

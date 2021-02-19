@@ -53,7 +53,7 @@ public class BuildDistancesVectors
 		}
 	}
 
-	public static class tempNameReducer extends Reducer<StringBooleanPair, StringVectorsQuadruplePair, StringStringPair, ArrayWritable>
+	public static class CreatePairDistancesVectorReducer extends Reducer<StringBooleanPair, StringVectorsQuadruplePair, StringStringPair, ArrayWritable>
 	{
 		private VectorsQuadruple mainWordVectors = null;
 
