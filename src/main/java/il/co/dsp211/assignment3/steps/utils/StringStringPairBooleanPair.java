@@ -41,8 +41,12 @@ public class StringStringPairBooleanPair implements WritableComparable<StringStr
 	@Override
 	public int compareTo(StringStringPairBooleanPair o)
 	{
-		final int stringStringPairCompare = stringStringPair.compareTo(o.stringStringPair);
-		return stringStringPairCompare != 0 ? stringStringPairCompare : Boolean.compare(isNotFirst, o.isNotFirst);
+		final int
+				firstWordCompare = stringStringPair.getWord().compareTo(o.stringStringPair.getWord()),
+				isNotFirstCompare;
+		return firstWordCompare != 0 ? firstWordCompare :
+		       (isNotFirstCompare = Boolean.compare(isNotFirst, o.isNotFirst)) != 0 ? isNotFirstCompare :
+		       stringStringPair.getDepLabel().compareTo(o.stringStringPair.getDepLabel());
 	}
 
 	@Override
