@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.function.DoubleFunction;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class BuildCoVectors
@@ -81,6 +82,9 @@ public class BuildCoVectors
 		private Map<StringStringPair, ShortLongPair> map;
 		private long counterFL;
 
+		private final long[] vectorLittleF = new long[1000];
+
+
 		@Override
 		protected void setup(Context context) throws IOException
 		{
@@ -92,12 +96,15 @@ public class BuildCoVectors
 						.collect(Collectors.toMap(strings -> StringStringPair.of(strings[0]), strings -> new ShortLongPair(Short.parseShort(strings[1]), Long.parseLong(strings[2]))));
 			}
 
+			map.values().parallelStream()
+					.forEach(iAndCountF -> vectorLittleF[iAndCountF.getKey()] = iAndCountF.getValue());
+
 			counterFL = context.getConfiguration().getLong("CounterFL", -1);
 		}
 
 		/**
 		 * @param key     ⟨word,
-		 * @param values  [⟨word, dep label⟩ | ⟨"Count_L_Label", count(l) (as string)⟩]⟩
+		 * @param values  [⟨word, dep label⟩ | ⟨"Count_L_Label", count(l) (as {@link Text})⟩]⟩
 		 * @param context
 		 */
 		@Override
@@ -108,40 +115,41 @@ public class BuildCoVectors
 					vector6 = new DoubleWritable[1000],
 					vector7 = new DoubleWritable[1000],
 					vector8 = new DoubleWritable[1000];
-			Arrays.parallelSetAll(vector5, value -> new LongWritable());
-			final IntFunction<DoubleWritable> doubleWritableIntFunction = value -> new DoubleWritable();
-			Arrays.parallelSetAll(vector6, doubleWritableIntFunction);
-			Arrays.parallelSetAll(vector7, doubleWritableIntFunction);
-			Arrays.parallelSetAll(vector8, doubleWritableIntFunction);
+			IntStream.range(0, 1000).parallel().forEach(i ->
+			{
+				vector5[i] = new LongWritable();
+				vector6[i] = new DoubleWritable();
+				vector7[i] = new DoubleWritable();
+				vector8[i] = new DoubleWritable();
+			});
 
 			long countLittleL = -1;
 
 			// Calc Vector 5
-			for (final StringStringPair next : values) {
-				if (next.getWord().equals("Count_L_Label")) {
+			for (final StringStringPair next : values)
+			{
+				if (next.getWord().equals("Count_L_Label"))
+				{
 					countLittleL = Long.parseLong(next.getDepLabel());
-				}
-				else if (map.containsKey(next)) {
+				} else if (map.containsKey(next))
+				{
 					final short i = map.get(next).getKey();
 					vector5[i].set(vector5[i].get() + 1);
 				}
 			}
 
 			// Calc Vectors 6-8
-			for (final StringStringPair next : values)
-				if (map.containsKey(next))
-				{
-					final short i = map.get(next).getKey();
-					final double
-							probLittleL = 1.0 * countLittleL / counterFL,
-							probLittleF = 1.0 * map.get(next).getValue() / counterFL;
-//					vector6[i].set(1.5);
-//					vector7[i].set(4.5);
-//					vector8[i].set(1.0 * 15 / 3);
-					vector6[i].set(1.0 * vector5[i].get() / countLittleL);
-					vector7[i].set(Math.log10((1.0 * vector5[i].get()) / counterFL / (probLittleL * probLittleF)) / Math.log10(2));
-					vector8[i].set((1.0 * vector5[i].get() / counterFL - probLittleL * probLittleF) / Math.sqrt(probLittleL * probLittleF));
-				}
+			final long finalCountLittleL = countLittleL;
+			IntStream.range(0, 1000).parallel().forEach(i ->
+			{
+				final double
+						probLittleL = 1.0 * finalCountLittleL / counterFL,
+						probLittleF = 1.0 * vectorLittleF[i] / counterFL;
+				vector6[i].set(1.0 * vector5[i].get() / finalCountLittleL);
+				vector7[i].set(Math.log10((1.0 * vector5[i].get()) / counterFL / (probLittleL * probLittleF)) / Math.log10(2));
+				vector8[i].set((1.0 * vector5[i].get() / counterFL - probLittleL * probLittleF) / Math.sqrt(probLittleL * probLittleF));
+			});
+
 			context.write(key, new VectorsQuadruple(vector5, vector6, vector7, vector8));
 		}
 	}
