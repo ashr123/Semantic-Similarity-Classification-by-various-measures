@@ -181,14 +181,12 @@ public class BuildDistancesVectors
 					throw new IllegalStateException("ERROR: mainWordVectors should be initialized!");
 			} else
 			{
-				int count = 0;
+				boolean seen = false;
 				for (StringVectorsQuadruplePair next : values)
 				{
-					if (count > 0)
-					{
+					if (seen)
 						throw new IllegalStateException("ERROR: Should not have more than 1 record like: ⟨⟨word1, isNotFirst=false⟩, ⟨word2=\"\", VectorsQuadruple⟩⟩");
-					}
-					count++;
+					seen = true;
 					mainWordVectors = next.getValue();
 				}
 			}
