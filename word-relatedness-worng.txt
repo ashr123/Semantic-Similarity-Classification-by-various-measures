@@ -2258,7 +2258,7 @@ hospital	sustainability	False
 hospital	symmetry	False
 hospital	thesis	False
 hospital	track	False
-hospital	value	False
+hospital	key	False
 hospital	yard	False
 hotel	castle	False
 hotel	cathedral	False
@@ -3996,7 +3996,7 @@ bag	exterior	False
 bag	handle	False
 bag	inside	False
 bag	interior	False
-bag	key	False
+bag	value	False
 bag	leather	False
 bag	outside	False
 bag	paper	False
@@ -4210,7 +4210,7 @@ box	edge	False
 box	exterior	False
 box	inside	False
 box	interior	False
-box	key	False
+box	value	False
 box	label	False
 box	lid	False
 box	lock	False
@@ -7947,7 +7947,7 @@ clarinet	bell	False
 clarinet	bore	False
 clarinet	hole	False
 clarinet	joint	False
-clarinet	key	False
+clarinet	value	False
 clarinet	metal	False
 clarinet	mouthpiece	False
 clarinet	reed	False
@@ -8015,7 +8015,7 @@ flute	object	True
 flute	woodwind	True
 flute	copper	False
 flute	hole	False
-flute	key	False
+flute	value	False
 flute	metal	False
 flute	nickel	False
 flute	silver	False
@@ -8165,7 +8165,7 @@ piano	bottom	False
 piano	ebony	False
 piano	front	False
 piano	ivory	False
-piano	key	False
+piano	value	False
 piano	keyboard	False
 piano	pedal	False
 piano	rim	False
@@ -8235,7 +8235,7 @@ saxophone	woodwind	True
 saxophone	bore	False
 saxophone	brass	False
 saxophone	hole	False
-saxophone	key	False
+saxophone	value	False
 saxophone	metal	False
 saxophone	mouthpiece	False
 saxophone	reed	False
@@ -8302,7 +8302,7 @@ trumpet	woodwind	True
 trumpet	bore	False
 trumpet	brass	False
 trumpet	hole	False
-trumpet	key	False
+trumpet	value	False
 trumpet	metal	False
 trumpet	mouthpiece	False
 trumpet	silver	False
