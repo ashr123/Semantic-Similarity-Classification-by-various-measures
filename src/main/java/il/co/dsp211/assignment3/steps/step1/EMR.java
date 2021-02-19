@@ -126,13 +126,12 @@ public class EMR
 		//--------------------------------------------------------------------------------------------------------------
 
 		System.out.println("Building job 4 - BuildDistancesVectors...");
-//		conf.set("goldenStandardFileName", args[2]); // TODO: Keep or Remove ???
 
 		Job job4 = Job.getInstance(conf);
 		job4.setJarByClass(BuildDistancesVectors.class);
 
 		job4.setInputFormatClass(SequenceFileInputFormat.class);
-		job4.setOutputFormatClass(SequenceFileOutputFormat.class);
+//		job4.setOutputFormatClass(SequenceFileOutputFormat.class); //TODO: UnComment !!!
 
 		job4.setMapperClass(BuildDistancesVectors.BuildMatchingCoVectorsMapper.class);
 		job4.setMapOutputKeyClass(StringBooleanPair.class);
