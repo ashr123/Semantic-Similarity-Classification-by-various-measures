@@ -20,9 +20,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class BuildCoVectors {
-	private static Set<String> readGoldenStandardToSet(Mapper<?, ?, ?, ?>.Context context) throws IOException {
-		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(context.getConfiguration().get("goldenStandardFileName"))))) {
+public class BuildCoVectors
+{
+	private static Set<String> readGoldenStandardToSet(Mapper<?, ?, ?, ?>.Context context) throws IOException
+	{
+		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(context.getConfiguration().get("goldenStandardFileName")))))
+		{
 			return bufferedReader.lines().parallel()
 					.map(line -> line.split("\t"))
 					.flatMap(strings -> Stream.of(strings[0], strings[1]))
@@ -30,11 +33,13 @@ public class BuildCoVectors {
 		}
 	}
 
-	public static class VectorRecordFilterMapper extends Mapper<LongWritable, Text, Text, StringStringPair> {
+	public static class VectorRecordFilterMapper extends Mapper<LongWritable, Text, Text, StringStringPair>
+	{
 		private Set<String> goldenStandardWords;
 
 		@Override
-		protected void setup(Context context) throws IOException, InterruptedException {
+		protected void setup(Context context) throws IOException, InterruptedException
+		{
 			goldenStandardWords = readGoldenStandardToSet(context);
 		}
 
@@ -44,9 +49,11 @@ public class BuildCoVectors {
 		 * @param context ⟨word, ⟨word, dep label⟩⟩
 		 */
 		@Override
-		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException
+		{
 			final String[] tokens = value.toString().split("\t")[1].split(" ");
-			for (final String tokensSplit : tokens) {
+			for (final String tokensSplit : tokens)
+			{
 				final String[] token = tokensSplit.split("/");
 				if (token.length != 4)
 					continue;
@@ -57,11 +64,13 @@ public class BuildCoVectors {
 		}
 	}
 
-	public static class CounterLittleLMapper extends Mapper<StringStringPair, LongWritable, Text, StringStringPair> {
+	public static class CounterLittleLMapper extends Mapper<StringStringPair, LongWritable, Text, StringStringPair>
+	{
 		private Set<String> goldenStandardWords;
 
 		@Override
-		protected void setup(Context context) throws IOException, InterruptedException {
+		protected void setup(Context context) throws IOException, InterruptedException
+		{
 			goldenStandardWords = readGoldenStandardToSet(context);
 		}
 
@@ -71,19 +80,22 @@ public class BuildCoVectors {
 		 * @param context ⟨word, ⟨"Count_L_Label", count(l) (as string)⟩⟩
 		 */
 		@Override
-		protected void map(StringStringPair key, LongWritable value, Context context) throws IOException, InterruptedException {
+		protected void map(StringStringPair key, LongWritable value, Context context) throws IOException, InterruptedException
+		{
 			if (key.getDepLabel().equals("Count_L_Label") && goldenStandardWords.contains(key.getWord()))
 				context.write(new Text(key.getWord()), new StringStringPair("Count_L_Label", value.toString()));
 		}
 	}
 
-	public static class CalculateEmbeddingsReducer extends Reducer<Text, StringStringPair, Text, VectorsQuadruple> {
+	public static class CalculateEmbeddingsReducer extends Reducer<Text, StringStringPair, Text, VectorsQuadruple>
+	{
 		private Map<StringStringPair, IntegerLongPair> features;
 		private long[] vectorLittleF;
 		private long counterFL;
 
 		@Override
-		protected void setup(Context context) throws IOException {
+		protected void setup(Context context) throws IOException
+		{
 			try (FileSystem fileSystem = FileSystem.get(context.getConfiguration());
 			     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileSystem.open(new Path("features.txt")))))
 			{
@@ -109,7 +121,8 @@ public class BuildCoVectors {
 		 * @param context ⟨word, ⟨vector5, vector6, vector7, vector8⟩⟩
 		 */
 		@Override
-		protected void reduce(Text key, Iterable<StringStringPair> values, Context context) throws IOException, InterruptedException {
+		protected void reduce(Text key, Iterable<StringStringPair> values, Context context) throws IOException, InterruptedException
+		{
 			final LongWritable[] vector5 = new LongWritable[vectorLittleF.length];
 			final DoubleWritable[]
 					vector6 = new DoubleWritable[vectorLittleF.length],
@@ -126,16 +139,20 @@ public class BuildCoVectors {
 			long countLittleL = -1;
 
 			// Calc Vector 5
-			for (final StringStringPair next : values) {
-				if (next.getWord().equals("Count_L_Label")) {
+			for (final StringStringPair next : values)
+			{
+				if (next.getWord().equals("Count_L_Label"))
+				{
 					countLittleL = Long.parseLong(next.getDepLabel());
-				} else if (features.containsKey(next)) {
+				} else if (features.containsKey(next))
+				{
 					final int i = features.get(next).getKey();
 					vector5[i].set(vector5[i].get() + 1);
 				}
 			}
 
-			if (countLittleL == -1) {
+			if (countLittleL == -1)
+			{
 				throw new IllegalStateException("Count Little fucking L");
 			}
 
