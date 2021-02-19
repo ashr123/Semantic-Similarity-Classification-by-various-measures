@@ -1,6 +1,6 @@
 package il.co.dsp211.assignment3.steps.step1.jobs;
 
-import il.co.dsp211.assignment3.steps.utils.ShortLongPair;
+import il.co.dsp211.assignment3.steps.utils.IntegerLongPair;
 import il.co.dsp211.assignment3.steps.utils.StringStringPair;
 import il.co.dsp211.assignment3.steps.utils.VectorsQuadruple;
 import org.apache.hadoop.fs.FileSystem;
@@ -89,8 +89,8 @@ public class BuildCoVectors
 
 	public static class CalculateEmbeddingsReducer extends Reducer<Text, StringStringPair, Text, VectorsQuadruple>
 	{
-		private final long[] vectorLittleF = new long[1000];
-		private Map<StringStringPair, ShortLongPair> map;
+		private Map<StringStringPair, IntegerLongPair> features;
+		private long[] vectorLittleF;
 		private long counterFL;
 
 		@Override
@@ -99,12 +99,17 @@ public class BuildCoVectors
 			try (FileSystem fileSystem = FileSystem.get(context.getConfiguration());
 			     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileSystem.open(new Path("features.txt")))))
 			{
-				map = bufferedReader.lines().parallel()
+				features = bufferedReader.lines().parallel()
 						.map(s -> s.split("\t"))
-						.collect(Collectors.toMap(strings -> StringStringPair.of(strings[0]), strings -> new ShortLongPair(Short.parseShort(strings[1]), Long.parseLong(strings[2]))));
+						.collect(Collectors.toMap(strings -> StringStringPair.of(strings[0]), strings -> new IntegerLongPair(Integer.parseInt(strings[1]), Long.parseLong(strings[2]))));
 			}
 
-			map.values().parallelStream()
+			vectorLittleF = new long[features.size()/*features.values().parallelStream()
+					.map(IntegerLongPair::getKey)
+					.mapToInt(Integer::valueOf)
+					.max()
+					.orElse(0)*/];
+			features.values().parallelStream()
 					.forEach(iAndCountF -> vectorLittleF[iAndCountF.getKey()] = iAndCountF.getValue());
 
 			counterFL = context.getConfiguration().getLong("CounterFL", -1);
@@ -118,12 +123,12 @@ public class BuildCoVectors
 		@Override
 		protected void reduce(Text key, Iterable<StringStringPair> values, Context context) throws IOException, InterruptedException
 		{
-			final LongWritable[] vector5 = new LongWritable[1000];
+			final LongWritable[] vector5 = new LongWritable[vectorLittleF.length];
 			final DoubleWritable[]
-					vector6 = new DoubleWritable[1000],
-					vector7 = new DoubleWritable[1000],
-					vector8 = new DoubleWritable[1000];
-			IntStream.range(0, 1000).parallel().forEach(i ->
+					vector6 = new DoubleWritable[vectorLittleF.length],
+					vector7 = new DoubleWritable[vectorLittleF.length],
+					vector8 = new DoubleWritable[vectorLittleF.length];
+			IntStream.range(0, vectorLittleF.length).parallel().forEach(i ->
 			{
 				vector5[i] = new LongWritable();
 				vector6[i] = new DoubleWritable();
@@ -139,16 +144,16 @@ public class BuildCoVectors
 				if (next.getWord().equals("Count_L_Label"))
 				{
 					countLittleL = Long.parseLong(next.getDepLabel());
-				} else if (map.containsKey(next))
+				} else if (features.containsKey(next))
 				{
-					final short i = map.get(next).getKey();
+					final int i = features.get(next).getKey();
 					vector5[i].set(vector5[i].get() + 1);
 				}
 			}
 
 			// Calc Vectors 6-8
 			final long finalCountLittleL = countLittleL;
-			IntStream.range(0, 1000).parallel().forEach(i ->
+			IntStream.range(0, vectorLittleF.length).parallel().forEach(i ->
 			{
 				final double
 						probLittleL = 1.0 * finalCountLittleL / counterFL,

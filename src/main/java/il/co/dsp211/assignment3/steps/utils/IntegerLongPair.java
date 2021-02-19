@@ -7,28 +7,28 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Objects;
 
-public class ShortLongPair implements WritableComparable<ShortLongPair>
+public class IntegerLongPair implements WritableComparable<IntegerLongPair>
 {
-	private short key;
+	private int key;
 	private long value;
 
-	public ShortLongPair()
+	public IntegerLongPair()
 	{
 	}
 
-	public ShortLongPair(short key, long value)
+	public IntegerLongPair(int key, long value)
 	{
 		this.key = key;
 		this.value = value;
 	}
 
-	public static ShortLongPair of(String string)
+	public static IntegerLongPair of(String string)
 	{
 		final String[] values = string.split("🤠");
-		return new ShortLongPair(Short.parseShort(values[0]), Long.parseLong(values[1]));
+		return new IntegerLongPair(Integer.parseInt(values[0]), Long.parseLong(values[1]));
 	}
 
-	public short getKey()
+	public int getKey()
 	{
 		return key;
 	}
@@ -43,9 +43,9 @@ public class ShortLongPair implements WritableComparable<ShortLongPair>
 	{
 		if (this == o)
 			return true;
-		if (!(o instanceof ShortLongPair))
+		if (!(o instanceof IntegerLongPair))
 			return false;
-		ShortLongPair that = (ShortLongPair) o;
+		IntegerLongPair that = (IntegerLongPair) o;
 		return key == that.key &&
 		       value == that.value;
 	}
@@ -77,9 +77,9 @@ public class ShortLongPair implements WritableComparable<ShortLongPair>
 	}
 
 	@Override
-	public int compareTo(ShortLongPair o)
+	public int compareTo(IntegerLongPair o)
 	{
 		final int valueCompare = Long.compare(value, o.value);
-		return valueCompare != 0 ? valueCompare : Short.compare(key, o.key);
+		return valueCompare != 0 ? valueCompare : Integer.compare(key, o.key);
 	}
 }

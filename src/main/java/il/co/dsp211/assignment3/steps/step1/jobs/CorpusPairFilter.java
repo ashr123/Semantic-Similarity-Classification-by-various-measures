@@ -32,7 +32,7 @@ public class CorpusPairFilter
 	public static class FilterTopPairsReducer extends Reducer<LongWritable, StringStringPair, Void, Void>
 	{
 		private final StringBuilder stringBuilder = new StringBuilder();
-		private short counter = 0;
+		private int counter = 0, numOfFeaturesToSkip, numOfFeatures;
 
 		@Override
 		public void run(Context context) throws IOException, InterruptedException
@@ -40,7 +40,7 @@ public class CorpusPairFilter
 			setup(context);
 			try
 			{
-				while (counter < 1100 && context.nextKey())
+				while (counter < numOfFeaturesToSkip + numOfFeatures && context.nextKey())
 				{
 					reduce(context.getCurrentKey(), context.getValues(), context);
 					// If a back up store is used, reset it
@@ -57,6 +57,13 @@ public class CorpusPairFilter
 			}
 		}
 
+		@Override
+		protected void setup(Context context) throws IOException, InterruptedException
+		{
+			numOfFeaturesToSkip = context.getConfiguration().getInt("numOfFeaturesToSkip", 0);
+			numOfFeatures = context.getConfiguration().getInt("numOfFeatures", 0);
+		}
+
 		/**
 		 * <p>IMPORTANT1: need to execute with only 1 reducer in order to maintain valid counter</p>
 		 * <p>IMPORTANT2: Use TextOutputFormat!!!</p>
@@ -69,9 +76,9 @@ public class CorpusPairFilter
 		protected void reduce(LongWritable key, Iterable<StringStringPair> values, Context context)
 		{
 			final Iterator<StringStringPair> iterator = values.iterator();
-			for (; counter < 100 && iterator.hasNext(); counter++, iterator.next()) ;
-			for (; counter < 1100 && iterator.hasNext(); counter++)
-				stringBuilder.append(iterator.next()).append('\t').append(counter - 100).append('\t').append(key.get()).append('\n');
+			for (; counter < numOfFeaturesToSkip && iterator.hasNext(); counter++, iterator.next()) ;
+			for (; counter < numOfFeaturesToSkip + numOfFeatures && iterator.hasNext(); counter++)
+				stringBuilder.append(iterator.next()).append('\t').append(counter - numOfFeaturesToSkip).append('\t').append(key.get()).append('\n');
 		}
 
 		@Override

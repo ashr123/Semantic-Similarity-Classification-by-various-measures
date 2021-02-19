@@ -64,6 +64,8 @@ public class EMR
 		System.out.println("Building job 2 - CorpusPairFilter...");
 
 		conf.setLong("CounterFL", job1.getCounters().findCounter(NCounter.N_COUNTER).getValue());
+		conf.setInt("numOfFeaturesToSkip", Integer.parseInt(args[3]));
+		conf.setInt("numOfFeatures", Integer.parseInt(args[4]));
 
 		Job job2 = Job.getInstance(conf);
 		job2.setJarByClass(CorpusPairFilter.class);

@@ -48,7 +48,9 @@ public class Main
 								.withMainClass(EMR.class.getName())
 								.withArgs("s3://" + properties.getProperty("bucketName") + "/",
 										properties.getProperty("isReadSubset"),
-										properties.getProperty("goldenStandardFileName"))))
+										properties.getProperty("goldenStandardFileName"),
+										properties.getProperty("numOfFeaturesToSkip"),
+										properties.getProperty("numOfFeatures"))))
 						.withLogUri("s3://" + properties.getProperty("bucketName") + "/logs") // a URI in S3 for log files is required when debugging is enabled
 						.withServiceRole("EMR_DefaultRole") // replace the default with a custom IAM service role if one is used
 						.withJobFlowRole("EMR_EC2_DefaultRole") // replace the default with a custom EMR role for the EC2 instance profile if one is used
