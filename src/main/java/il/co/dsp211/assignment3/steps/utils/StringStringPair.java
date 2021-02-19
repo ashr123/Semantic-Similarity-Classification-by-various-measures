@@ -28,6 +28,13 @@ public class StringStringPair implements WritableComparable<StringStringPair>
 		return new StringStringPair(values[0], values[1]);
 	}
 
+	public static StringStringPair read(DataInput in) throws IOException
+	{
+		final StringStringPair stringStringPair = new StringStringPair();
+		stringStringPair.readFields(in);
+		return stringStringPair;
+	}
+
 	public String getWord()
 	{
 		return word;
