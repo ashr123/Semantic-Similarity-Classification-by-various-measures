@@ -14,17 +14,25 @@ import org.apache.hadoop.mapreduce.Reducer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.DoubleFunction;
-import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class BuildCoVectors
 {
+	private static Set<String> readGoldenStandardToSet(Mapper<?, ?, ?, ?>.Context context) throws IOException
+	{
+		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(context.getConfiguration().get("goldenStandardFileName")))))
+		{
+			return bufferedReader.lines().parallel()
+					.map(line -> line.split("\t"))
+					.flatMap(strings -> Stream.of(strings[0], strings[1]))
+					.collect(Collectors.toSet());
+		}
+	}
+
 	public static class VectorRecordFilterMapper extends Mapper<LongWritable, Text, Text, StringStringPair>
 	{
 		private Set<String> goldenStandardWords;
@@ -32,13 +40,7 @@ public class BuildCoVectors
 		@Override
 		protected void setup(Context context) throws IOException, InterruptedException
 		{
-			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(context.getConfiguration().get("goldenStandardFileName")))))
-			{
-				goldenStandardWords = bufferedReader.lines().parallel()
-						.map(line -> line.split("\t"))
-						.flatMap(strings -> Stream.of(strings[0], strings[1]))
-						.collect(Collectors.toSet());
-			}
+			goldenStandardWords = readGoldenStandardToSet(context);
 		}
 
 		/**
@@ -64,26 +66,32 @@ public class BuildCoVectors
 
 	public static class CounterLittleLMapper extends Mapper<StringStringPair, LongWritable, Text, StringStringPair>
 	{
+		private Set<String> goldenStandardWords;
+
+		@Override
+		protected void setup(Context context) throws IOException, InterruptedException
+		{
+			goldenStandardWords = readGoldenStandardToSet(context);
+		}
+
 		/**
 		 * @param key     ⟨⟨word, dep label⟩,
 		 * @param value   count(l)⟩
-		 * @param context ⟨word, ⟨"Count_L_Label", count(l) (as string)⟩⟩ ????????
+		 * @param context ⟨word, ⟨"Count_L_Label", count(l) (as string)⟩⟩
 		 */
 		@Override
 		protected void map(StringStringPair key, LongWritable value, Context context) throws IOException, InterruptedException
 		{
-			if (key.getDepLabel().equals("Count_L_Label"))
+			if (key.getDepLabel().equals("Count_L_Label") && goldenStandardWords.contains(key.getWord()))
 				context.write(new Text(key.getWord()), new StringStringPair("Count_L_Label", value.toString()));
 		}
 	}
 
 	public static class CalculateEmbeddingsReducer extends Reducer<Text, StringStringPair, Text, VectorsQuadruple>
 	{
+		private final long[] vectorLittleF = new long[1000];
 		private Map<StringStringPair, ShortLongPair> map;
 		private long counterFL;
-
-		private final long[] vectorLittleF = new long[1000];
-
 
 		@Override
 		protected void setup(Context context) throws IOException
