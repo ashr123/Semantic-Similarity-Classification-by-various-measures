@@ -167,7 +167,7 @@ public class BuildDistancesVectors
 							// DistEuclidean - results
 							vector24D[i * 6 + 1] = new DoubleWritable(Math.sqrt(sumArrayEuclideanTemp[i]));
 							// simCosine - results
-							vector24D[i * 6 + 2] = new DoubleWritable(sumMulTemp[i] / (Math.sqrt(sumV1SquareTemp[i]) * Math.sqrt(sumV2SquareTemp[i])));
+							vector24D[i * 6 + 2] = new DoubleWritable(sumMulTemp[i] / Math.sqrt(sumV1SquareTemp[i]) / Math.sqrt(sumV2SquareTemp[i]));
 							// simJaccard - results
 							vector24D[i * 6 + 3] = new DoubleWritable(sumMinTemp[i] / sumMaxTemp[i]);
 							// simDice - results
