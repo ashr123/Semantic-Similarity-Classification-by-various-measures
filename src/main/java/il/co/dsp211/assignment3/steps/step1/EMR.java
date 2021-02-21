@@ -137,7 +137,6 @@ public class EMR
 		job4.setMapOutputValueClass(StringVectorsQuadruplePair.class);
 
 		job4.setPartitionerClass(BuildDistancesVectors.JoinPartitioner.class);
-//		job4.setSortComparatorClass(StringBooleanPair.StringBooleanGroupingComparator.class); //TODO: REMOVE?
 
 		job4.setReducerClass(BuildDistancesVectors.CreatePairDistancesVectorReducer.class);
 		job4.setOutputKeyClass(StringStringPair.class);
