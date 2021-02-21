@@ -1,10 +1,6 @@
 package il.co.dsp211.assignment3.steps.step1.jobs;
 
-import il.co.dsp211.assignment3.steps.utils.StringBooleanPair;
-import il.co.dsp211.assignment3.steps.utils.StringStringPair;
-import il.co.dsp211.assignment3.steps.utils.StringVectorsQuadruplePair;
-import il.co.dsp211.assignment3.steps.utils.VectorsQuadruple;
-import il.co.dsp211.assignment3.steps.utils.ArrayWritable;
+import il.co.dsp211.assignment3.steps.utils.*;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
@@ -19,13 +15,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class BuildDistancesVectors {
-	public static class BuildMatchingCoVectorsMapper extends Mapper<Text, VectorsQuadruple, StringBooleanPair, StringVectorsQuadruplePair> {
+public class BuildDistancesVectors
+{
+	public static class BuildMatchingCoVectorsMapper extends Mapper<Text, VectorsQuadruple, StringBooleanPair, StringVectorsQuadruplePair>
+	{
 		private Map<String, Map<String, Boolean>> goldenStandard;
 
 		@Override
-		protected void setup(Context context) throws IOException, InterruptedException {
-			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(context.getConfiguration().get("goldenStandardFileName"))))) {
+		protected void setup(Context context) throws IOException, InterruptedException
+		{
+			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(context.getConfiguration().get("goldenStandardFileName")))))
+			{
 				goldenStandard = bufferedReader.lines()
 						.map(line -> line.split("\t"))
 						.collect(Collectors.groupingBy(strings -> strings[0],
@@ -39,12 +39,15 @@ public class BuildDistancesVectors {
 		 * @param context ⟨⟨word1, isNotFirst⟩, ⟨word2, VectorsQuadruple⟩⟩
 		 */
 		@Override
-		protected void map(Text key, VectorsQuadruple value, Context context) throws IOException, InterruptedException {
+		protected void map(Text key, VectorsQuadruple value, Context context) throws IOException, InterruptedException
+		{
 			context.write(new StringBooleanPair(key.toString(), false), new StringVectorsQuadruplePair("", value));
 
 			// TODO: Check why that's possible
-			if (goldenStandard.containsKey(key.toString())) {
-				for (String neighbor : goldenStandard.get(key.toString()).keySet()) {
+			if (goldenStandard.containsKey(key.toString()))
+			{
+				for (String neighbor : goldenStandard.get(key.toString()).keySet())
+				{
 					context.write(new StringBooleanPair(neighbor, true), new StringVectorsQuadruplePair(key.toString(), value));
 				}
 			}
@@ -52,11 +55,13 @@ public class BuildDistancesVectors {
 	}
 
 
-	public static class CreatePairDistancesVectorReducer extends Reducer<StringBooleanPair, StringVectorsQuadruplePair, StringStringPair, ArrayWritable> {
+	public static class CreatePairDistancesVectorReducer extends Reducer<StringBooleanPair, StringVectorsQuadruplePair, StringStringPair, ArrayWritable>
+	{
 		private VectorsQuadruple mainWordVectors;
 
 		@Override
-		protected void setup(Context context) throws IOException, InterruptedException {
+		protected void setup(Context context) throws IOException, InterruptedException
+		{
 			mainWordVectors = null;
 		}
 
@@ -66,10 +71,14 @@ public class BuildDistancesVectors {
 		 * @param context ⟨⟨word1, word2⟩, 24-Vector⟩
 		 */
 		@Override
-		protected void reduce(StringBooleanPair key, Iterable<StringVectorsQuadruplePair> values, Context context) throws IOException, InterruptedException {
-			if (key.isValue()) {
-				if (mainWordVectors != null) {
-					for (StringVectorsQuadruplePair next : values) {
+		protected void reduce(StringBooleanPair key, Iterable<StringVectorsQuadruplePair> values, Context context) throws IOException, InterruptedException
+		{
+			if (key.isValue())
+			{
+				if (mainWordVectors != null)
+				{
+					for (StringVectorsQuadruplePair next : values)
+					{
 						final LongWritable[]
 								vector5_word1 = mainWordVectors.getVector5(),
 								vector5_word2 = next.getValue().getVector5();
@@ -177,12 +186,12 @@ public class BuildDistancesVectors {
 						context.write(new StringStringPair(key.getKey(), next.getKey()), new ArrayWritable(DoubleWritable.class, vector24D));
 					}
 					mainWordVectors = null;
-				} else {
-					return;
 				}
-			} else {
+			} else
+			{
 				boolean seen = false;
-				for (StringVectorsQuadruplePair next : values) {
+				for (StringVectorsQuadruplePair next : values)
+				{
 					if (seen)
 						throw new IllegalStateException("ERROR: Should not have more than 1 record like: ⟨⟨word1, isNotFirst=false⟩, ⟨word2=\"\", VectorsQuadruple⟩⟩");
 					seen = true;
@@ -192,7 +201,8 @@ public class BuildDistancesVectors {
 		}
 	}
 
-	public static class JoinPartitioner extends Partitioner<StringBooleanPair, StringVectorsQuadruplePair> {
+	public static class JoinPartitioner extends Partitioner<StringBooleanPair, StringVectorsQuadruplePair>
+	{
 		/**
 		 * Ensures that record with with same head-word are directed to the same reducer
 		 *
@@ -202,7 +212,8 @@ public class BuildDistancesVectors {
 		 * @return the partition number for the <code>key</code>.
 		 */
 		@Override
-		public int getPartition(StringBooleanPair key, StringVectorsQuadruplePair value, int numPartitions) {
+		public int getPartition(StringBooleanPair key, StringVectorsQuadruplePair value, int numPartitions)
+		{
 			return (key.getKey().hashCode() & Integer.MAX_VALUE) % numPartitions;
 		}
 	}

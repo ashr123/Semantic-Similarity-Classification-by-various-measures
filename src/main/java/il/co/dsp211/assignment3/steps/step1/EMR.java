@@ -18,8 +18,10 @@ import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
 import java.io.IOException;
 
-public class EMR {
-	public static void main(String... args) throws IOException, ClassNotFoundException, InterruptedException {
+public class EMR
+{
+	public static void main(String... args) throws IOException, ClassNotFoundException, InterruptedException
+	{
 		boolean jobStatus;
 		final Configuration conf = new Configuration();
 
@@ -50,7 +52,7 @@ public class EMR {
 		FileOutputFormat.setOutputPath(job1, new Path(args[0] + "Step1Output-CorpusWordCount"));
 
 		System.out.println("Done building!\n" +
-				"Starting job 1 - Corpus Word Count...");
+		                   "Starting job 1 - Corpus Word Count...");
 		System.out.println("Job 1 - Corpus Word Count: completed with success status: " + (jobStatus = job1.waitForCompletion(true)) + "!");
 
 		if (!jobStatus)
@@ -86,7 +88,7 @@ public class EMR {
 		FileOutputFormat.setOutputPath(job2, new Path(args[0] + "Step2Output-CorpusPairFilter"));
 
 		System.out.println("Done building!\n" +
-				"Starting job 2 - CorpusPairFilter...");
+		                   "Starting job 2 - CorpusPairFilter...");
 		System.out.println("Job 2 - CorpusPairFilter: completed with success status: " + (jobStatus = job2.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;
@@ -115,7 +117,7 @@ public class EMR {
 		FileOutputFormat.setOutputPath(job3, new Path(args[0] + "Step3Output-BuildCoVectors"));
 
 		System.out.println("Done building!\n" +
-				"Starting job 3 - BuildCoVectors...");
+		                   "Starting job 3 - BuildCoVectors...");
 		System.out.println("Job 3 - BuildCoVectors: completed with success status: " + (jobStatus = job3.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;
@@ -145,7 +147,7 @@ public class EMR {
 		FileOutputFormat.setOutputPath(job4, new Path(args[0] + "Step4Output-BuildDistancesVectors"));
 
 		System.out.println("Done building!\n" +
-				"Starting job 4 - BuildDistancesVectors...");
+		                   "Starting job 4 - BuildDistancesVectors...");
 		System.out.println("Job 4 - BuildDistancesVectors: completed with success status: " + (jobStatus = job4.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;

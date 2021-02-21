@@ -2,28 +2,25 @@ package il.co.dsp211.assignment3.steps.utils;
 
 import org.apache.hadoop.io.Writable;
 
-public class ArrayWritable extends org.apache.hadoop.io.ArrayWritable {
+public class ArrayWritable extends org.apache.hadoop.io.ArrayWritable
+{
 
-	public ArrayWritable(Class<? extends Writable> valueClass) {
+	public ArrayWritable(Class<? extends Writable> valueClass)
+	{
 		super(valueClass);
 	}
 
-	public ArrayWritable(Class<? extends Writable> valueClass, Writable[] values) {
+	public ArrayWritable(Class<? extends Writable> valueClass, Writable[] values)
+	{
 		super(valueClass, values);
 	}
 
-	public ArrayWritable(String[] strings) {
+	public ArrayWritable(String[] strings)
+	{
 		super(strings);
 	}
 
-	@Override
-	public String toString() {
-		final StringBuilder stringBuilder = new StringBuilder();
-		arraysString(stringBuilder, super.get());
-		return stringBuilder.toString();
-	}
-
-	private static void arraysString(StringBuilder b, Object[] a)
+	static void arraysString(StringBuilder b, Object[] a)
 	{
 		if (a == null)
 		{
@@ -42,5 +39,13 @@ public class ArrayWritable extends org.apache.hadoop.io.ArrayWritable {
 				return;
 			b.append("#");
 		}
+	}
+
+	@Override
+	public String toString()
+	{
+		final StringBuilder stringBuilder = new StringBuilder();
+		arraysString(stringBuilder, super.get());
+		return stringBuilder.toString();
 	}
 }

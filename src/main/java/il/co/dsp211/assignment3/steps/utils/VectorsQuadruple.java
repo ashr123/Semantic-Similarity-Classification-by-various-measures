@@ -1,6 +1,5 @@
 package il.co.dsp211.assignment3.steps.utils;
 
-import org.apache.hadoop.io.ArrayWritable;
 import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.WritableComparable;
@@ -52,27 +51,6 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 		}
 
 		return a.length - b.length;
-	}
-
-	private static void arraysString(StringBuilder b, Object[] a)
-	{
-		if (a == null)
-		{
-			b.append("null");
-			return;
-		}
-
-		int iMax = a.length - 1;
-		if (iMax == -1)
-			return;
-
-		for (int i = 0; ; i++)
-		{
-			b.append(a[i]);
-			if (i == iMax)
-				return;
-			b.append("#");
-		}
 	}
 
 	public static VectorsQuadruple of(String string)
@@ -197,13 +175,13 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 	public String toString()
 	{
 		final StringBuilder stringBuilder = new StringBuilder();
-		arraysString(stringBuilder, vector5);
+		ArrayWritable.arraysString(stringBuilder, vector5);
 		stringBuilder.append("🤠");
-		arraysString(stringBuilder, vector6);
+		ArrayWritable.arraysString(stringBuilder, vector6);
 		stringBuilder.append("🤠");
-		arraysString(stringBuilder, vector7);
+		ArrayWritable.arraysString(stringBuilder, vector7);
 		stringBuilder.append("🤠");
-		arraysString(stringBuilder, vector8);
+		ArrayWritable.arraysString(stringBuilder, vector8);
 		return stringBuilder.toString();
 	}
 }
