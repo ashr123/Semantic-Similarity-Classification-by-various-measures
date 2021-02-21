@@ -26,33 +26,6 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 		this.vector8 = vector8;
 	}
 
-	private static <T extends Comparable<? super T>> int compare(T[] a, T[] b)
-	{
-		if (a == b)
-			return 0;
-		// A null array is less than a non-null array
-		if (a == null || b == null)
-			return a == null ? -1 : 1;
-
-		int length = Math.min(a.length, b.length);
-		for (int i = 0; i < length; i++)
-		{
-			T oa = a[i];
-			T ob = b[i];
-			if (oa != ob)
-			{
-				// A null element is less than a non-null element
-				if (oa == null || ob == null)
-					return oa == null ? -1 : 1;
-				int v = oa.compareTo(ob);
-				if (v != 0)
-					return v;
-			}
-		}
-
-		return a.length - b.length;
-	}
-
 	public static VectorsQuadruple of(String string)
 	{
 		final String[] values = string.split("🤠"),
@@ -107,13 +80,13 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 	public int compareTo(VectorsQuadruple o)
 	{
 		final int
-				vector5Compare = compare(vector5, o.vector5),
+				vector5Compare = ArrayWritable.compare(vector5, o.vector5),
 				vector6Compare,
 				vector7Compare;
 		return vector5Compare != 0 ? vector5Compare :
-		       (vector6Compare = compare(vector6, o.vector6)) != 0 ? vector6Compare :
-		       (vector7Compare = compare(vector7, o.vector7)) != 0 ? vector7Compare :
-		       compare(vector8, o.vector8);
+		       (vector6Compare = ArrayWritable.compare(vector6, o.vector6)) != 0 ? vector6Compare :
+		       (vector7Compare = ArrayWritable.compare(vector7, o.vector7)) != 0 ? vector7Compare :
+		       ArrayWritable.compare(vector8, o.vector8);
 	}
 
 	@Override
