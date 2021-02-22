@@ -37,7 +37,7 @@ public class ArrayWritable extends org.apache.hadoop.io.ArrayWritable
 			b.append(a[i]);
 			if (i == iMax)
 				return;
-			b.append("#");
+			b.append(",");
 		}
 	}
 
