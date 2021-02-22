@@ -1,9 +1,6 @@
 package il.co.dsp211.assignment3.steps.step1;
 
-import il.co.dsp211.assignment3.steps.step1.jobs.BuildCoVectors;
-import il.co.dsp211.assignment3.steps.step1.jobs.BuildDistancesVectors;
-import il.co.dsp211.assignment3.steps.step1.jobs.CorpusPairFilter;
-import il.co.dsp211.assignment3.steps.step1.jobs.CorpusWordCount;
+import il.co.dsp211.assignment3.steps.step1.jobs.*;
 import il.co.dsp211.assignment3.steps.utils.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -17,12 +14,17 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.core.Debug;
+import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Normalize;
+
 import java.io.IOException;
 
 public class EMR
 {
-	public static void main(String... args) throws IOException, ClassNotFoundException, InterruptedException
-	{
+	public static void main(String... args) throws Exception {
 		boolean jobStatus;
 		final Configuration conf = new Configuration();
 
@@ -151,6 +153,91 @@ public class EMR
 		System.out.println("Job 4 - BuildDistancesVectors: completed with success status: " + (jobStatus = job4.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;
+
+		//--------------------------------------------------------------------------------------------------------------
+
+		// TODO: Create ARFF File
+		/*
+
+			@relation "Word Relatedness"
+
+			@attribute freq_distManhattan real
+			@attribute freq_distEuclidean real
+			@attribute freq_simCosine real
+			@attribute freq_simJaccard real
+			@attribute freq_simDice real
+			@attribute freq_simJS real
+
+			@attribute prob_distManhattan real
+			@attribute prob_distEuclidean real
+			@attribute prob_simCosine real
+			@attribute prob_simJaccard real
+			@attribute prob_simDice real
+			@attribute prob_simJS real
+
+			@attribute PMI_distManhattan real
+			@attribute PMI_distEuclidean real
+			@attribute PMI_simCosine real
+			@attribute PMI_simJaccard real
+			@attribute PMI_simDice real
+			@attribute PMI_simJS real
+
+			@attribute ttest_distManhattan real
+			@attribute ttest_distEuclidean real
+			@attribute ttest_simCosine real
+			@attribute ttest_simJaccard real
+			@attribute ttest_simDice real
+			@attribute ttest_simJS real
+
+			@attribute class {similar, not-similar}
+
+			@data
+			TBD
+
+		 */
+
+		// Generate Model
+		// TODO: FIX PATHS
+		final String DATASETPATH = "/Users/Emaraic/Temp/ml/iris.2D.arff";
+		final String MODElPATH = "/Users/Emaraic/Temp/ml/model.bin";
+
+		ModelGenerator mg = new ModelGenerator();
+
+		Instances dataset = mg.loadDataset(DATASETPATH);
+
+		Filter filter = new Normalize();
+
+		// divide dataset to train dataset 80% and test dataset 20%
+		int trainSize = (int) Math.round(dataset.numInstances() * 0.8);
+		int testSize = dataset.numInstances() - trainSize;
+
+		dataset.randomize(new Debug.Random(1));// if you comment this line the accuracy of the model will be droped from 96.6% to 80%
+
+		//Normalize dataset
+		filter.setInputFormat(dataset);
+		Instances datasetnor = Filter.useFilter(dataset, filter);
+
+		Instances traindataset = new Instances(datasetnor, 0, trainSize);
+		Instances testdataset = new Instances(datasetnor, trainSize, testSize);
+
+		// build classifier with train dataset
+		MultilayerPerceptron ann = (MultilayerPerceptron) mg.buildClassifier(traindataset);
+
+		// Evaluate classifier with test dataset
+		String evalsummary = mg.evaluateModel(ann, traindataset, testdataset);
+		System.out.println("Evaluation: " + evalsummary);
+
+		//Save model
+		mg.saveModel(ann, MODElPATH);
+
+		//classifiy a single instance
+		/*
+		TODO: REVIEW
+		ModelClassifier cls = new ModelClassifier();
+		String classname =cls.classifiy(Filter.useFilter(cls.createInstance(1.6, 0.2, 0), filter), MODElPATH);
+		System.out.println("\n The class name for the instance with petallength = 1.6 and petalwidth =0.2 is  " +classname);
+		*/
+
 
 		//--------------------------------------------------------------------------------------------------------------
 
