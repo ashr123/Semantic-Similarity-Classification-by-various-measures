@@ -1,6 +1,5 @@
 package il.co.dsp211.assignment3.steps.utils;
 
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.WritableComparable;
 
@@ -29,10 +28,10 @@ public class VectorsQuadruple implements WritableComparable<VectorsQuadruple>
 	public static VectorsQuadruple of(String string)
 	{
 		final String[] values = string.split("🤠"),
-				vector5Strings = values[0].split("#"),
-				vector6Strings = values[1].split("#"),
-				vector7Strings = values[2].split("#"),
-				vector8Strings = values[3].split("#");
+				vector5Strings = values[0].split(","),
+				vector6Strings = values[1].split(","),
+				vector7Strings = values[2].split(","),
+				vector8Strings = values[3].split(",");
 
 		final LongWritable[] vector5 = new LongWritable[vector5Strings.length];
 		Arrays.parallelSetAll(vector5, i -> new LongWritable(Long.parseLong(vector5Strings[i])));

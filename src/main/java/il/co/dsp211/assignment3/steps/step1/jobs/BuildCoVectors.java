@@ -1,11 +1,8 @@
 package il.co.dsp211.assignment3.steps.step1.jobs;
 
-import il.co.dsp211.assignment3.steps.utils.IntegerLongPair;
-import il.co.dsp211.assignment3.steps.utils.StringStringPair;
-import il.co.dsp211.assignment3.steps.utils.VectorsQuadruple;
+import il.co.dsp211.assignment3.steps.utils.*;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.DoubleWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
@@ -15,34 +12,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class BuildCoVectors
 {
-	private static Set<String> readGoldenStandardToSet(Mapper<?, ?, ?, ?>.Context context) throws IOException
-	{
-		try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(context.getConfiguration().get("goldenStandardFileName")))))
-		{
-			return bufferedReader.lines().parallel()
-					.map(line -> line.split("\t"))
-					.flatMap(strings -> Stream.of(strings[0], strings[1]))
-					.collect(Collectors.toSet());
-		}
-	}
-
 	public static class VectorRecordFilterMapper extends Mapper<LongWritable, Text, Text, StringStringPair>
 	{
-		private Set<String> goldenStandardWords;
-
-		@Override
-		protected void setup(Context context) throws IOException, InterruptedException
-		{
-			goldenStandardWords = readGoldenStandardToSet(context);
-		}
-
 		/**
 		 * @param key     ⟨line number,
 		 * @param value   ⟨head word, ⟨⟨word<sub>1</sub>, pos tag, dep label, head index⟩, ⟨word<sub>2</sub>, pos tag, dep label, head index⟩, ⟨word<sub>3</sub>, pos tag, dep label, head index⟩⟩, total count, counts by year⟩
@@ -58,7 +34,7 @@ public class BuildCoVectors
 				if (token.length != 4)
 					continue;
 				final int headIndex = Integer.parseInt(token[3]);
-				if (headIndex != 0 && headIndex < tokens.length && goldenStandardWords.contains(token[0]))
+				if (headIndex != 0 && headIndex < tokens.length && GoldenStandard.readGoldenStandardToSet(context.getConfiguration()).contains(token[0]))
 					context.write(new Text(token[0]), new StringStringPair(tokens[headIndex].split("/")[0], token[2]));
 			}
 		}
@@ -66,23 +42,10 @@ public class BuildCoVectors
 
 	public static class CounterLittleLMapper extends Mapper<StringStringPair, LongWritable, Text, StringStringPair>
 	{
-		private Set<String> goldenStandardWords;
-
-		@Override
-		protected void setup(Context context) throws IOException, InterruptedException
-		{
-			goldenStandardWords = readGoldenStandardToSet(context);
-		}
-
-		/**
-		 * @param key     ⟨⟨word, dep label⟩,
-		 * @param value   count(l)⟩
-		 * @param context ⟨word, ⟨"Count_L_Label", count(l) (as string)⟩⟩
-		 */
 		@Override
 		protected void map(StringStringPair key, LongWritable value, Context context) throws IOException, InterruptedException
 		{
-			if (key.getDepLabel().equals("Count_L_Label") && goldenStandardWords.contains(key.getWord()))
+			if (key.getDepLabel().equals("Count_L_Label") && GoldenStandard.readGoldenStandardToSet(context.getConfiguration()).contains(key.getWord()))
 				context.write(new Text(key.getWord()), new StringStringPair("Count_L_Label", value.toString()));
 		}
 	}

@@ -1,38 +1,20 @@
 package il.co.dsp211.assignment3.steps.step1.jobs;
 
 import il.co.dsp211.assignment3.steps.utils.*;
-import org.apache.hadoop.io.DoubleWritable;
+import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Partitioner;
 import org.apache.hadoop.mapreduce.Reducer;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class BuildDistancesVectors
 {
 	public static class BuildMatchingCoVectorsMapper extends Mapper<Text, VectorsQuadruple, StringBooleanPair, StringVectorsQuadruplePair>
 	{
-		private Map<String, Map<String, Boolean>> goldenStandard;
-
-		@Override
-		protected void setup(Context context) throws IOException, InterruptedException
-		{
-			try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(context.getConfiguration().get("goldenStandardFileName")))))
-			{
-				goldenStandard = bufferedReader.lines()
-						.map(line -> line.split("\t"))
-						.collect(Collectors.groupingBy(strings -> strings[0],
-								Collectors.toMap(strings -> strings[1], strings -> Boolean.valueOf(strings[2]))));
-			}
-		}
-
 		/**
 		 * @param key     ⟨word,
 		 * @param value   ⟨vector5, vector6, vector7, vector8⟩⟩
@@ -44,9 +26,9 @@ public class BuildDistancesVectors
 			context.write(new StringBooleanPair(key.toString(), false), new StringVectorsQuadruplePair("", value));
 
 			// TODO: Check why that's possible
-			if (goldenStandard.containsKey(key.toString()))
+			if (GoldenStandard.getGoldenStandard(context.getConfiguration()).containsKey(key.toString()))
 			{
-				for (String neighbor : goldenStandard.get(key.toString()).keySet())
+				for (String neighbor : GoldenStandard.getGoldenStandard(context.getConfiguration()).get(key.toString()).keySet())
 				{
 					context.write(new StringBooleanPair(neighbor, true), new StringVectorsQuadruplePair(key.toString(), value));
 				}
@@ -55,7 +37,7 @@ public class BuildDistancesVectors
 	}
 
 
-	public static class CreatePairDistancesVectorReducer extends Reducer<StringBooleanPair, StringVectorsQuadruplePair, StringStringPair, ArrayWritable>
+	public static class CreatePairDistancesVectorReducer extends Reducer<StringBooleanPair, StringVectorsQuadruplePair, ArrayWritable, BooleanWritable>
 	{
 		private VectorsQuadruple mainWordVectors;
 
@@ -183,7 +165,11 @@ public class BuildDistancesVectors
 							// simJS - results
 							vector24D[i * 6 + 5] = new DoubleWritable(sumD1Temp[i] + sumD2Temp[i]);
 						});
-						context.write(new StringStringPair(key.getKey(), next.getKey()), new ArrayWritable(DoubleWritable.class, vector24D));
+
+						context.write(new ArrayWritable(DoubleWritable.class, vector24D),
+								new BooleanWritable(GoldenStandard.getGoldenStandard(context.getConfiguration())
+										.get(next.getKey())
+										.get(key.getKey())));
 					}
 					mainWordVectors = null;
 				}

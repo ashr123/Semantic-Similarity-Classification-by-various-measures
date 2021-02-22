@@ -7,6 +7,7 @@ import il.co.dsp211.assignment3.steps.step1.jobs.CorpusWordCount;
 import il.co.dsp211.assignment3.steps.utils.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
@@ -139,8 +140,8 @@ public class EMR
 		job4.setPartitionerClass(BuildDistancesVectors.JoinPartitioner.class);
 
 		job4.setReducerClass(BuildDistancesVectors.CreatePairDistancesVectorReducer.class);
-		job4.setOutputKeyClass(StringStringPair.class);
-		job4.setOutputValueClass(ArrayWritable.class);
+		job4.setOutputKeyClass(ArrayWritable.class);
+		job4.setOutputValueClass(BooleanWritable.class);
 
 		FileInputFormat.addInputPath(job4, new Path(args[0] + "Step3Output-BuildCoVectors"));
 		FileOutputFormat.setOutputPath(job4, new Path(args[0] + "Step4Output-BuildDistancesVectors"));

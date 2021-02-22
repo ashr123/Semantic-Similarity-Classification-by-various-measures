@@ -4,7 +4,6 @@ import org.apache.hadoop.io.Writable;
 
 public class ArrayWritable extends org.apache.hadoop.io.ArrayWritable
 {
-
 	public ArrayWritable(Class<? extends Writable> valueClass)
 	{
 		super(valueClass);
@@ -34,7 +33,7 @@ public class ArrayWritable extends org.apache.hadoop.io.ArrayWritable
 
 		for (int i = 0; ; i++)
 		{
-			b.append(a[i]);
+			b.append(a[i]); // TODO check if '?' is needed or 0
 			if (i == iMax)
 				return;
 			b.append(",");
@@ -72,7 +71,7 @@ public class ArrayWritable extends org.apache.hadoop.io.ArrayWritable
 	public String toString()
 	{
 		final StringBuilder stringBuilder = new StringBuilder();
-		arraysString(stringBuilder, super.get());
+		arraysString(stringBuilder, get());
 		return stringBuilder.toString();
 	}
 }
