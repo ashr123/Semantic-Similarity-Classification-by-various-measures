@@ -45,7 +45,7 @@ public class Main
 						.withReleaseLabel("emr-6.2.0") // specifies the EMR release version label, we recommend the latest release
 						// create a step to enable debugging in the AWS Management Console
 						.withSteps(new StepConfig("EMR", new HadoopJarStepConfig("s3://" + properties.getProperty("bucketName") + "/" + properties.getProperty("jarFileName") + ".jar")
-								.withMainClass(EMR.class.getName())
+//								.withMainClass(EMR.class.getName()) // TODO: ???
 								.withArgs("s3://" + properties.getProperty("bucketName") + "/",
 										properties.getProperty("isReadSubset"),
 										properties.getProperty("goldenStandardFileName"),

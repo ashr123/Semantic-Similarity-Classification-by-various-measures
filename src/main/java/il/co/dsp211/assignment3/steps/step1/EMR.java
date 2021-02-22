@@ -1,8 +1,10 @@
 package il.co.dsp211.assignment3.steps.step1;
 
+import com.amazonaws.util.StringInputStream;
 import il.co.dsp211.assignment3.steps.step1.jobs.*;
 import il.co.dsp211.assignment3.steps.utils.*;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -13,17 +15,15 @@ import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-
 import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.Debug;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Normalize;
 
-import java.io.IOException;
+import java.io.*;
 
-public class EMR
-{
+public class EMR {
 	public static void main(String... args) throws Exception {
 		boolean jobStatus;
 		final Configuration conf = new Configuration();
@@ -55,7 +55,7 @@ public class EMR
 		FileOutputFormat.setOutputPath(job1, new Path(args[0] + "Step1Output-CorpusWordCount"));
 
 		System.out.println("Done building!\n" +
-		                   "Starting job 1 - Corpus Word Count...");
+				"Starting job 1 - Corpus Word Count...");
 		System.out.println("Job 1 - Corpus Word Count: completed with success status: " + (jobStatus = job1.waitForCompletion(true)) + "!");
 
 		if (!jobStatus)
@@ -91,7 +91,7 @@ public class EMR
 		FileOutputFormat.setOutputPath(job2, new Path(args[0] + "Step2Output-CorpusPairFilter"));
 
 		System.out.println("Done building!\n" +
-		                   "Starting job 2 - CorpusPairFilter...");
+				"Starting job 2 - CorpusPairFilter...");
 		System.out.println("Job 2 - CorpusPairFilter: completed with success status: " + (jobStatus = job2.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;
@@ -120,7 +120,7 @@ public class EMR
 		FileOutputFormat.setOutputPath(job3, new Path(args[0] + "Step3Output-BuildCoVectors"));
 
 		System.out.println("Done building!\n" +
-		                   "Starting job 3 - BuildCoVectors...");
+				"Starting job 3 - BuildCoVectors...");
 		System.out.println("Job 3 - BuildCoVectors: completed with success status: " + (jobStatus = job3.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;
@@ -149,7 +149,7 @@ public class EMR
 		FileOutputFormat.setOutputPath(job4, new Path(args[0] + "Step4Output-BuildDistancesVectors"));
 
 		System.out.println("Done building!\n" +
-		                   "Starting job 4 - BuildDistancesVectors...");
+				"Starting job 4 - BuildDistancesVectors...");
 		System.out.println("Job 4 - BuildDistancesVectors: completed with success status: " + (jobStatus = job4.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;
@@ -197,46 +197,92 @@ public class EMR
 		 */
 
 		// Generate Model
+
 		// TODO: FIX PATHS
+		/*
 		final String DATASETPATH = "/Users/Emaraic/Temp/ml/iris.2D.arff";
 		final String MODElPATH = "/Users/Emaraic/Temp/ml/model.bin";
 
 		ModelGenerator mg = new ModelGenerator();
+		 */
 
-		Instances dataset = mg.loadDataset(DATASETPATH);
+		try (FileSystem fileSystem = FileSystem.get(conf);
+		     BufferedReader arff = new BufferedReader(new InputStreamReader(new SequenceInputStream(new StringInputStream(
+				     "@relation \"Word Relatedness\"\n" +
+						     "\n" +
+						     "@attribute freq_distManhattan real\n" +
+						     "@attribute freq_distEuclidean real\n" +
+						     "@attribute freq_simCosine real\n" +
+						     "@attribute freq_simJaccard real\n" +
+						     "@attribute freq_simDice real\n" +
+						     "@attribute freq_simJS real\n" +
+						     "\n" +
+						     "@attribute prob_distManhattan real\n" +
+						     "@attribute prob_distEuclidean real\n" +
+						     "@attribute prob_simCosine real\n" +
+						     "@attribute prob_simJaccard real\n" +
+						     "@attribute prob_simDice real\n" +
+						     "@attribute prob_simJS real\n" +
+						     "\n" +
+						     "@attribute PMI_distManhattan real\n" +
+						     "@attribute PMI_distEuclidean real\n" +
+						     "@attribute PMI_simCosine real\n" +
+						     "@attribute PMI_simJaccard real\n" +
+						     "@attribute PMI_simDice real\n" +
+						     "@attribute PMI_simJS real\n" +
+						     "\n" +
+						     "@attribute ttest_distManhattan real\n" +
+						     "@attribute ttest_distEuclidean real\n" +
+						     "@attribute ttest_simCosine real\n" +
+						     "@attribute ttest_simJaccard real\n" +
+						     "@attribute ttest_simDice real\n" +
+						     "@attribute ttest_simJS real\n" +
+						     "\n" +
+						     "@attribute class {similar, not-similar}\n" +
+						     "\n" +
+						     "@data\n"
+		     ),
+				     fileSystem.open(new Path(args[0] + "Step4Output-BuildDistancesVectors")))))) {
 
-		Filter filter = new Normalize();
+			arff.lines().forEach(System.out::println);
 
-		// divide dataset to train dataset 80% and test dataset 20%
-		int trainSize = (int) Math.round(dataset.numInstances() * 0.8);
-		int testSize = dataset.numInstances() - trainSize;
+			/*
+			Instances dataset = mg.loadDataset(arff);
 
-		dataset.randomize(new Debug.Random(1));// if you comment this line the accuracy of the model will be droped from 96.6% to 80%
+			Filter filter = new Normalize();
 
-		//Normalize dataset
-		filter.setInputFormat(dataset);
-		Instances datasetnor = Filter.useFilter(dataset, filter);
+			// divide dataset to train dataset 80% and test dataset 20%
+			int trainSize = (int) Math.round(dataset.numInstances() * 0.8);
+			int testSize = dataset.numInstances() - trainSize;
 
-		Instances traindataset = new Instances(datasetnor, 0, trainSize);
-		Instances testdataset = new Instances(datasetnor, trainSize, testSize);
+			dataset.randomize(new Debug.Random(1));// if you comment this line the accuracy of the model will be droped from 96.6% to 80%
 
-		// build classifier with train dataset
-		MultilayerPerceptron ann = (MultilayerPerceptron) mg.buildClassifier(traindataset);
+			//Normalize dataset
+			filter.setInputFormat(dataset);
+			Instances datasetnor = Filter.useFilter(dataset, filter);
 
-		// Evaluate classifier with test dataset
-		String evalsummary = mg.evaluateModel(ann, traindataset, testdataset);
-		System.out.println("Evaluation: " + evalsummary);
+			Instances traindataset = new Instances(datasetnor, 0, trainSize);
+			Instances testdataset = new Instances(datasetnor, trainSize, testSize);
 
-		//Save model
-		mg.saveModel(ann, MODElPATH);
+			// build classifier with train dataset
+			MultilayerPerceptron ann = (MultilayerPerceptron) mg.buildClassifier(traindataset);
 
-		//classifiy a single instance
-		/*
-		TODO: REVIEW
-		ModelClassifier cls = new ModelClassifier();
-		String classname =cls.classifiy(Filter.useFilter(cls.createInstance(1.6, 0.2, 0), filter), MODElPATH);
-		System.out.println("\n The class name for the instance with petallength = 1.6 and petalwidth =0.2 is  " +classname);
-		*/
+			// Evaluate classifier with test dataset
+			String evalsummary = mg.evaluateModel(ann, traindataset, testdataset);
+			System.out.println("Evaluation: " + evalsummary);
+
+			//Save model
+			mg.saveModel(ann, MODElPATH);
+			 */
+
+			//classifiy a single instance
+			/*
+			TODO: REVIEW
+			ModelClassifier cls = new ModelClassifier();
+			String classname =cls.classifiy(Filter.useFilter(cls.createInstance(1.6, 0.2, 0), filter), MODElPATH);
+			System.out.println("\n The class name for the instance with petallength = 1.6 and petalwidth =0.2 is  " +classname);
+			*/
+		}
 
 
 		//--------------------------------------------------------------------------------------------------------------

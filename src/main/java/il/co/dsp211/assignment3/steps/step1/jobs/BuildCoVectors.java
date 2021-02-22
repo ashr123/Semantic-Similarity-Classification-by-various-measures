@@ -1,6 +1,7 @@
 package il.co.dsp211.assignment3.steps.step1.jobs;
 
 import il.co.dsp211.assignment3.steps.utils.*;
+import opennlp.tools.stemmer.PorterStemmer;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.LongWritable;
@@ -15,53 +16,48 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class BuildCoVectors
-{
-	public static class VectorRecordFilterMapper extends Mapper<LongWritable, Text, Text, StringStringPair>
-	{
+public class BuildCoVectors {
+	public static class VectorRecordFilterMapper extends Mapper<LongWritable, Text, Text, StringStringPair> {
+		private final PorterStemmer porterStemmer = new PorterStemmer();
+
 		/**
 		 * @param key     ⟨line number,
 		 * @param value   ⟨head word, ⟨⟨word<sub>1</sub>, pos tag, dep label, head index⟩, ⟨word<sub>2</sub>, pos tag, dep label, head index⟩, ⟨word<sub>3</sub>, pos tag, dep label, head index⟩⟩, total count, counts by year⟩
 		 * @param context ⟨word, ⟨word, dep label⟩⟩
 		 */
 		@Override
-		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException
-		{
+		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
 			final String[] tokens = value.toString().split("\t")[1].split(" ");
-			for (final String tokensSplit : tokens)
-			{
+			for (final String tokensSplit : tokens) {
 				final String[] token = tokensSplit.split("/");
 				if (token.length != 4)
 					continue;
 				final int headIndex = Integer.parseInt(token[3]);
-				if (headIndex != 0 && headIndex < tokens.length && GoldenStandard.readGoldenStandardToSet(context.getConfiguration()).contains(token[0]))
-					context.write(new Text(token[0]), new StringStringPair(tokens[headIndex].split("/")[0], token[2]));
+				String headWord = porterStemmer.stem(token[0]);
+				if (headIndex != 0 && headIndex < tokens.length && GoldenStandard.readGoldenStandardToSet(context.getConfiguration()).contains(headWord)) {
+					context.write(new Text(headWord), new StringStringPair(porterStemmer.stem(tokens[headIndex].split("/")[0]), token[2]));
+				}
 			}
 		}
 	}
 
-	public static class CounterLittleLMapper extends Mapper<StringStringPair, LongWritable, Text, StringStringPair>
-	{
+	public static class CounterLittleLMapper extends Mapper<StringStringPair, LongWritable, Text, StringStringPair> {
 		@Override
-		protected void map(StringStringPair key, LongWritable value, Context context) throws IOException, InterruptedException
-		{
+		protected void map(StringStringPair key, LongWritable value, Context context) throws IOException, InterruptedException {
 			if (key.getDepLabel().equals("Count_L_Label") && GoldenStandard.readGoldenStandardToSet(context.getConfiguration()).contains(key.getWord()))
 				context.write(new Text(key.getWord()), new StringStringPair("Count_L_Label", value.toString()));
 		}
 	}
 
-	public static class CalculateEmbeddingsReducer extends Reducer<Text, StringStringPair, Text, VectorsQuadruple>
-	{
+	public static class CalculateEmbeddingsReducer extends Reducer<Text, StringStringPair, Text, VectorsQuadruple> {
 		private Map<StringStringPair, IntegerLongPair> features;
 		private long[] vectorLittleF;
 		private long counterFL;
 
 		@Override
-		protected void setup(Context context) throws IOException
-		{
+		protected void setup(Context context) throws IOException {
 			try (FileSystem fileSystem = FileSystem.get(context.getConfiguration());
-			     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileSystem.open(new Path("features.txt")))))
-			{
+			     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileSystem.open(new Path("features.txt"))))) {
 				features = bufferedReader.lines().parallel()
 						.map(s -> s.split("\t"))
 						.collect(Collectors.toMap(strings -> StringStringPair.of(strings[0]), strings -> new IntegerLongPair(Integer.parseInt(strings[1]), Long.parseLong(strings[2]))));
@@ -84,8 +80,7 @@ public class BuildCoVectors
 		 * @param context ⟨word, ⟨vector5, vector6, vector7, vector8⟩⟩
 		 */
 		@Override
-		protected void reduce(Text key, Iterable<StringStringPair> values, Context context) throws IOException, InterruptedException
-		{
+		protected void reduce(Text key, Iterable<StringStringPair> values, Context context) throws IOException, InterruptedException {
 			final LongWritable[] vector5 = new LongWritable[vectorLittleF.length];
 			final DoubleWritable[]
 					vector6 = new DoubleWritable[vectorLittleF.length],
@@ -102,20 +97,16 @@ public class BuildCoVectors
 			long countLittleL = -1;
 
 			// Calc Vector 5
-			for (final StringStringPair next : values)
-			{
-				if (next.getWord().equals("Count_L_Label"))
-				{
+			for (final StringStringPair next : values) {
+				if (next.getWord().equals("Count_L_Label")) {
 					countLittleL = Long.parseLong(next.getDepLabel());
-				} else if (features.containsKey(next))
-				{
+				} else if (features.containsKey(next)) {
 					final int i = features.get(next).getKey();
 					vector5[i].set(vector5[i].get() + 1);
 				}
 			}
 
-			if (countLittleL == -1)
-			{
+			if (countLittleL == -1) {
 				throw new IllegalStateException("Count Little fucking L");
 			}
 

@@ -61,6 +61,12 @@
 			<artifactId>weka-stable</artifactId>
 			<version>3.8.5</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.opennlp/opennlp-tools -->
+		<dependency>
+			<groupId>org.apache.opennlp</groupId>
+			<artifactId>opennlp-tools</artifactId>
+			<version>1.9.3</version>
+		</dependency>
 		<!--		&lt;!&ndash; https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j &ndash;&gt;-->
 <!--		<dependency>-->
 <!--			<groupId>org.apache.logging.log4j</groupId>-->

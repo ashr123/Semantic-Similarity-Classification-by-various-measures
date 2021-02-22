@@ -1,7 +1,7 @@
 package il.co.dsp211.assignment3.steps.utils;
 
+import opennlp.tools.stemmer.PorterStemmer; // TODO: SWITCH TO SnowBall Stemmer
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,10 +28,10 @@ public class GoldenStandard
 				if (goldenStandard == null)
 					try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(conf.get("goldenStandardFileName")))))
 					{
-						goldenStandard = bufferedReader.lines()
+						goldenStandard = bufferedReader.lines().parallel()
 								.map(line -> line.split("\t"))
-								.collect(Collectors.groupingBy(strings -> strings[0],
-										Collectors.toMap(strings -> strings[1], strings -> Boolean.valueOf(strings[2]))));
+								.collect(Collectors.groupingBy(strings -> new PorterStemmer().stem(strings[0]),
+										Collectors.toMap(strings -> new PorterStemmer().stem(strings[1]), strings -> Boolean.valueOf(strings[2]), (b1, b2) -> b1 && b2)));
 					}
 			}
 		return goldenStandard;
@@ -47,7 +47,7 @@ public class GoldenStandard
 					{
 						goldenStandardSet = bufferedReader.lines().parallel()
 								.map(line -> line.split("\t"))
-								.flatMap(strings -> Stream.of(strings[0], strings[1]))
+								.flatMap(strings -> Stream.of(new PorterStemmer().stem(strings[0]), new PorterStemmer().stem(strings[1])))
 								.collect(Collectors.toSet());
 					}
 			}
