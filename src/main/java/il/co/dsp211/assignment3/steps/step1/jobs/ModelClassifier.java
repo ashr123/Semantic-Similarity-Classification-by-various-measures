@@ -41,8 +41,8 @@ public class ModelClassifier {
 	private Attribute ttest_simDice;
 	private Attribute ttest_simJS;
 
-	private ArrayList attributes;
-	private ArrayList classVal;
+	private ArrayList<Attribute> attributes;
+	private ArrayList<String> classVal;
 	private Instances dataRaw;
 
 
@@ -75,10 +75,10 @@ public class ModelClassifier {
 		ttest_simDice = new Attribute("ttest_simDice");
 		ttest_simJS = new Attribute("ttest_simJS");
 
-		attributes = new ArrayList();
-		classVal = new ArrayList();
-		classVal.add("similar");
-		classVal.add("not-similar");
+		attributes = new ArrayList<>();
+		classVal = new ArrayList<>();
+		classVal.add("true");
+		classVal.add("false");
 
 		attributes.add(freq_distManhattan);
 		attributes.add(freq_distEuclidean);

@@ -27,15 +27,39 @@ public class Main
 
 	public static void main(String... args) throws IOException
 	{
-		System.out.println("Creating cluster...");
+//		System.out.println("Creating cluster...");
 		final Properties properties = new Properties();
 		try (InputStream input = new FileInputStream("config.properties"))
 		{
 			properties.load(input);
 		}
-
-		// create an EMR client using the credentials and region specified in order to create the cluster
+//
+//		// create an EMR client using the credentials and region specified in order to create the cluster
 		final Regions region = Regions.valueOf(properties.getProperty("region").toUpperCase());
+
+//		try (S3Client s3Client = S3Client.builder()
+//				.region(Region.of(region.getName()))
+//				.build();
+//		     BufferedReader arff = new BufferedReader(new InputStreamReader(bucketBatch(s3Client, properties.getProperty("bucketName"), "Step4Output-BuildDistancesVectors/"))))
+//		{
+//			Files.write(FileSystems.getDefault().getPath("output.txt"), (Iterable<? extends CharSequence>) () -> new Iterator<CharSequence>()
+//			{
+//				private final Iterator<? extends CharSequence> iterator = arff.lines().iterator();
+//
+//				@Override
+//				public boolean hasNext()
+//				{
+//					return iterator.hasNext();
+//				}
+//
+//				@Override
+//				public CharSequence next()
+//				{
+//					return iterator.next();
+//				}
+//			}, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+//		}
+
 		System.out.println("Cluster created with ID: " + AmazonElasticMapReduceClientBuilder.standard()
 				.withRegion(region)
 				.build()

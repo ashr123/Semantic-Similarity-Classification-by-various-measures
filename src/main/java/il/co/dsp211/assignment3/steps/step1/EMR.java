@@ -1,14 +1,9 @@
 package il.co.dsp211.assignment3.steps.step1;
 
-import com.amazonaws.regions.Regions;
 import com.amazonaws.util.StringInputStream;
-import il.co.dsp211.assignment3.steps.step1.jobs.BuildCoVectors;
-import il.co.dsp211.assignment3.steps.step1.jobs.BuildDistancesVectors;
-import il.co.dsp211.assignment3.steps.step1.jobs.CorpusPairFilter;
-import il.co.dsp211.assignment3.steps.step1.jobs.CorpusWordCount;
+import il.co.dsp211.assignment3.steps.step1.jobs.*;
 import il.co.dsp211.assignment3.steps.utils.*;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -23,9 +18,13 @@ import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import weka.classifiers.functions.MultilayerPerceptron;
+import weka.core.Debug;
+import weka.core.Instances;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Normalize;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
@@ -171,19 +170,14 @@ public class EMR
 		/*
 		final String DATASETPATH = "/Users/Emaraic/Temp/ml/iris.2D.arff";
 		final String MODElPATH = "/Users/Emaraic/Temp/ml/model.bin";
-
-		ModelGenerator mg = new ModelGenerator();
-		 */
+*/
+		final ModelGenerator mg = new ModelGenerator();
 
 		try (S3Client s3Client = S3Client.builder()
-				     .region(Region.of(args[5]))
-				     .build();
-		     BufferedReader arff = new BufferedReader(new InputStreamReader(bucketBatch(s3Client, args[0].substring(5, args[0].length() - 1), "Step4Output-BuildDistancesVectors/"))))
+				.region(Region.of(args[5]))
+				.build();
+		     InputStream arff = bucketBatch(s3Client, args[0].substring(5, args[0].length() - 1), "Step4Output-BuildDistancesVectors/"))
 		{
-
-			arff.lines().forEach(System.out::println);
-
-			/*
 			Instances dataset = mg.loadDataset(arff);
 
 			Filter filter = new Normalize();
@@ -192,7 +186,7 @@ public class EMR
 			int trainSize = (int) Math.round(dataset.numInstances() * 0.8);
 			int testSize = dataset.numInstances() - trainSize;
 
-			dataset.randomize(new Debug.Random(1));// if you comment this line the accuracy of the model will be droped from 96.6% to 80%
+			dataset.randomize(new Debug.Random(1));// if you comment this line the accuracy of the model will be dropped from 96.6% to 80%
 
 			//Normalize dataset
 			filter.setInputFormat(dataset);
@@ -209,8 +203,7 @@ public class EMR
 			System.out.println("Evaluation: " + evalsummary);
 
 			//Save model
-			mg.saveModel(ann, MODElPATH);
-			 */
+//			mg.saveModel(ann, MODElPATH);
 
 			//classifiy a single instance
 			/*
@@ -253,7 +246,7 @@ public class EMR
 		*/
 	}
 
-	private static SequenceInputStream bucketBatch(S3Client s3Client, String bucketName, String folderPrefix) throws UnsupportedEncodingException
+	public static SequenceInputStream bucketBatch(S3Client s3Client, String bucketName, String folderPrefix) throws UnsupportedEncodingException
 	{
 		ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
 				.bucket(bucketName)
@@ -299,15 +292,15 @@ public class EMR
 						"@attribute ttest_simDice real\n" +
 						"@attribute ttest_simJS real\n" +
 						"\n" +
-						"@attribute class {similar, not-similar}\n" +
+						"@attribute class {true, false}\n" +
 						"\n" +
 						"@data\n") : sequenceInputStream,
 						new SequenceInputStream(new Enumeration<ResponseInputStream<GetObjectResponse>>()
 						{
 							private final Iterator<ResponseInputStream<GetObjectResponse>> iterator = finalListObjectsV2Response.contents().stream()
 									.map(S3Object::key)
-									.peek(key -> System.out.println("key: " + key))
-									.filter(key -> key.startsWith("part-r-"))
+									.filter(key -> key.contains("part-r-"))
+									.peek(key -> System.out.println("Collecting file: " + key))
 									.map(key -> s3Client.getObject(GetObjectRequest.builder()
 											.bucket(bucketName)
 											.key(key)
