@@ -178,7 +178,7 @@ public class EMR
 		     S3Client s3Client = S3Client.builder()
 				     .region(Region.US_EAST_1)
 				     .build();
-		     BufferedReader arff = new BufferedReader(new InputStreamReader(bucketBatch(s3Client, args[0], "Step4Output-BuildDistancesVectors/"))))
+		     BufferedReader arff = new BufferedReader(new InputStreamReader(bucketBatch(s3Client, args[0].replace("s3://", ""), "Step4Output-BuildDistancesVectors/"))))
 		{
 
 			arff.lines().forEach(System.out::println);
