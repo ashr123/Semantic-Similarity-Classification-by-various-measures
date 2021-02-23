@@ -40,9 +40,6 @@ public class EMR
 		boolean jobStatus;
 		final Configuration conf = new Configuration();
 
-		// TODO: TESTING
-//		long milliSeconds = 1000*60*60; //  default is 600000, likewise can give any value)
-//		conf.setLong("mapred.task.timeout", milliSeconds);
 
 		System.out.println("Building job 1 - Corpus Word Count...");
 
@@ -94,8 +91,6 @@ public class EMR
 		job2.setSortComparatorClass(LongWritable.DecreasingComparator.class);
 
 		job2.setReducerClass(CorpusPairFilter.FilterTopPairsReducer.class);
-//		job2.setOutputKeyClass(Void.class);
-//		job2.setOutputValueClass(Void.class);
 
 		job2.setNumReduceTasks(1);
 
@@ -145,7 +140,6 @@ public class EMR
 		job4.setJarByClass(BuildDistancesVectors.class);
 
 		job4.setInputFormatClass(SequenceFileInputFormat.class);
-//		job4.setOutputFormatClass(SequenceFileOutputFormat.class); //TODO: UnComment !!!
 
 		job4.setMapperClass(BuildDistancesVectors.BuildMatchingCoVectorsMapper.class);
 		job4.setMapOutputKeyClass(StringBooleanPair.class);
@@ -167,13 +161,10 @@ public class EMR
 			return;
 
 		//--------------------------------------------------------------------------------------------------------------
-		// Generate Model
 
-		// TODO: FIX PATHS
-		/*
-		final String DATASETPATH = "/Users/Emaraic/Temp/ml/iris.2D.arff";
-		final String MODElPATH = "/Users/Emaraic/Temp/ml/model.bin";
-*/
+		System.out.println("Starting WEKA...");
+
+		// Generate Model
 		final ModelGenerator mg = new ModelGenerator();
 
 		try (S3Client s3Client = S3Client.builder()
@@ -183,20 +174,11 @@ public class EMR
 		{
 			Instances dataset = mg.loadDataset(arff);
 
-			Filter filter = new Normalize();
-
 			// divide dataset to train dataset 80% and test dataset 20%
 			int trainSize = (int) Math.round(dataset.numInstances() * 0.8);
 			int testSize = dataset.numInstances() - trainSize;
 
 			dataset.randomize(new Debug.Random(1));// if you comment this line the accuracy of the model will be dropped from 96.6% to 80%
-
-			//Normalize dataset
-//			filter.setInputFormat(dataset);
-//			Instances datasetnor = Filter.useFilter(dataset, filter);
-
-//			Instances traindataset = new Instances(datasetnor, 0, trainSize);
-//			Instances testdataset = new Instances(datasetnor, trainSize, testSize);
 
 			Instances traindataset = new Instances(dataset, 0, trainSize);
 			Instances testdataset = new Instances(dataset, trainSize, testSize);
@@ -208,48 +190,19 @@ public class EMR
 			String evalsummary = mg.evaluateModel(ann, traindataset, testdataset);
 			System.out.println("Evaluation: " + evalsummary);
 
+			/*
 			//Save model
-//			mg.saveModel(ann, MODElPATH);
+			mg.saveModel(ann, MODElPATH);
 
 			//classifiy a single instance
-			/*
-			TODO: REVIEW
 			ModelClassifier cls = new ModelClassifier();
 			String classname =cls.classifiy(Filter.useFilter(cls.createInstance(1.6, 0.2, 0), filter), MODElPATH);
 			System.out.println("\n The class name for the instance with petallength = 1.6 and petalwidth =0.2 is  " +classname);
 			*/
 		}
 
-
-		//--------------------------------------------------------------------------------------------------------------
-
-
-		/*
-		System.out.println("Building job 5...");
-		Job job5 = Job.getInstance(conf);
-		job5.setJarByClass(Job5Sort.class);
-
-		job5.setInputFormatClass(SequenceFileInputFormat.class);
-		job5.setOutputFormatClass(TextOutputFormat.class);
-
-		job5.setMapperClass(Job5Sort.CastlingMapper.class);
-		job5.setMapOutputKeyClass(StringStringDoubleTriple.class);
-		job5.setMapOutputValueClass(Text.class);
-
-		job5.setReducerClass(Job5Sort.FinisherReducer.class);
-		job5.setOutputKeyClass(Text.class);
-		job5.setOutputValueClass(DoubleWritable.class);
-
-		job5.setNumReduceTasks(1);
-
-		FileInputFormat.addInputPath(job5, new Path(args[0] + ""));
-		FileOutputFormat.setOutputPath(job5, new Path(args[0] + "FinalOutput"));
-
-		System.out.println("Done building!\n" +
-		                   "Starting job 5...");
-		System.out.println("Job 5 completed with success status: " + job5.waitForCompletion(true) + "!\n" +
-		                   "Exiting...");
-		*/
+		System.out.println("WEKA completed successfully" + "\n" +
+				"Exiting...");
 	}
 
 	public static SequenceInputStream bucketBatch(S3Client s3Client, String bucketName, String folderPrefix) throws UnsupportedEncodingException

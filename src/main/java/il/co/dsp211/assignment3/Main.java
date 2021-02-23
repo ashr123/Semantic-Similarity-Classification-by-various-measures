@@ -17,48 +17,21 @@ import java.io.InputStream;
 import java.util.Properties;
 
 
-public class Main
-{
-	static
-	{
+public class Main {
+	static {
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.INFO);
 	}
 
-	public static void main(String... args) throws IOException
-	{
-//		System.out.println("Creating cluster...");
+	public static void main(String... args) throws IOException {
+		System.out.println("Creating cluster...");
 		final Properties properties = new Properties();
-		try (InputStream input = new FileInputStream("config.properties"))
-		{
+		try (InputStream input = new FileInputStream("config.properties")) {
 			properties.load(input);
 		}
-//
+
 //		// create an EMR client using the credentials and region specified in order to create the cluster
 		final Regions region = Regions.valueOf(properties.getProperty("region").toUpperCase());
-
-//		try (S3Client s3Client = S3Client.builder()
-//				.region(Region.of(region.getName()))
-//				.build();
-//		     BufferedReader arff = new BufferedReader(new InputStreamReader(bucketBatch(s3Client, properties.getProperty("bucketName"), "Step4Output-BuildDistancesVectors/"))))
-//		{
-//			Files.write(FileSystems.getDefault().getPath("output.txt"), (Iterable<? extends CharSequence>) () -> new Iterator<CharSequence>()
-//			{
-//				private final Iterator<? extends CharSequence> iterator = arff.lines().iterator();
-//
-//				@Override
-//				public boolean hasNext()
-//				{
-//					return iterator.hasNext();
-//				}
-//
-//				@Override
-//				public CharSequence next()
-//				{
-//					return iterator.next();
-//				}
-//			}, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
-//		}
 
 		System.out.println("Cluster created with ID: " + AmazonElasticMapReduceClientBuilder.standard()
 				.withRegion(region)
@@ -69,7 +42,7 @@ public class Main
 						.withReleaseLabel("emr-6.2.0") // specifies the EMR release version label, we recommend the latest release
 						// create a step to enable debugging in the AWS Management Console
 						.withSteps(new StepConfig("EMR", new HadoopJarStepConfig("s3://" + properties.getProperty("bucketName") + "/" + properties.getProperty("jarFileName") + ".jar")
-//								.withMainClass(EMR.class.getName()) // TODO: ???
+//								.withMainClass(EMR.class.getName()) // TODO: Uncomment if MANIFEST.MF not under 'resourcess' folder
 								.withArgs("s3://" + properties.getProperty("bucketName") + "/",
 										properties.getProperty("isReadSubset"),
 										properties.getProperty("goldenStandardFileName"),

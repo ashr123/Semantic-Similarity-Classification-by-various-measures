@@ -33,7 +33,7 @@ public class ArrayWritable extends org.apache.hadoop.io.ArrayWritable
 
 		for (int i = 0; ; i++)
 		{
-			b.append(a[i]); // TODO check if '?' is needed or 0
+			b.append(a[i]); // TODO: check if '?' is needed or 0
 			if (i == iMax)
 				return;
 			b.append(",");

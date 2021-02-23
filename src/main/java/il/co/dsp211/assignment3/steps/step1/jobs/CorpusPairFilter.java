@@ -76,7 +76,7 @@ public class CorpusPairFilter
 		protected void reduce(LongWritable key, Iterable<StringStringPair> values, Context context)
 		{
 			final Iterator<StringStringPair> iterator = values.iterator();
-			for (; counter < numOfFeaturesToSkip && iterator.hasNext(); counter++, iterator.next()) ;
+			for (; counter < numOfFeaturesToSkip && iterator.hasNext(); counter++, iterator.next());
 			for (; counter < numOfFeaturesToSkip + numOfFeatures && iterator.hasNext(); counter++)
 				stringBuilder.append(iterator.next()).append('\t').append(counter - numOfFeaturesToSkip).append('\t').append(key.get()).append('\n');
 		}
