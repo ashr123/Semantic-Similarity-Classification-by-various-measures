@@ -1,5 +1,6 @@
 package il.co.dsp211.assignment3.steps.step1;
 
+import com.amazonaws.regions.Regions;
 import com.amazonaws.util.StringInputStream;
 import il.co.dsp211.assignment3.steps.step1.jobs.BuildCoVectors;
 import il.co.dsp211.assignment3.steps.step1.jobs.BuildDistancesVectors;
@@ -174,11 +175,10 @@ public class EMR
 		ModelGenerator mg = new ModelGenerator();
 		 */
 
-		try (FileSystem fileSystem = FileSystem.get(conf);
-		     S3Client s3Client = S3Client.builder()
-				     .region(Region.US_EAST_1)
+		try (S3Client s3Client = S3Client.builder()
+				     .region(Region.of(args[5]))
 				     .build();
-		     BufferedReader arff = new BufferedReader(new InputStreamReader(bucketBatch(s3Client, args[0].replace("s3://", ""), "Step4Output-BuildDistancesVectors/"))))
+		     BufferedReader arff = new BufferedReader(new InputStreamReader(bucketBatch(s3Client, args[0].substring(5), "Step4Output-BuildDistancesVectors/"))))
 		{
 
 			arff.lines().forEach(System.out::println);

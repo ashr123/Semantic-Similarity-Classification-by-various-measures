@@ -7,7 +7,6 @@ import com.amazonaws.services.elasticmapreduce.model.HadoopJarStepConfig;
 import com.amazonaws.services.elasticmapreduce.model.JobFlowInstancesConfig;
 import com.amazonaws.services.elasticmapreduce.model.RunJobFlowRequest;
 import com.amazonaws.services.elasticmapreduce.model.StepConfig;
-import il.co.dsp211.assignment3.steps.step1.EMR;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -36,8 +35,9 @@ public class Main
 		}
 
 		// create an EMR client using the credentials and region specified in order to create the cluster
+		final Regions region = Regions.valueOf(properties.getProperty("region").toUpperCase());
 		System.out.println("Cluster created with ID: " + AmazonElasticMapReduceClientBuilder.standard()
-				.withRegion(Regions.valueOf(properties.getProperty("region").toUpperCase()))
+				.withRegion(region)
 				.build()
 				// create the cluster
 				.runJobFlow(new RunJobFlowRequest()
@@ -50,7 +50,8 @@ public class Main
 										properties.getProperty("isReadSubset"),
 										properties.getProperty("goldenStandardFileName"),
 										properties.getProperty("numOfFeaturesToSkip"),
-										properties.getProperty("numOfFeatures"))))
+										properties.getProperty("numOfFeatures"),
+										region.getName())))
 						.withLogUri("s3://" + properties.getProperty("bucketName") + "/logs") // a URI in S3 for log files is required when debugging is enabled
 						.withServiceRole("EMR_DefaultRole") // replace the default with a custom IAM service role if one is used
 						.withJobFlowRole("EMR_EC2_DefaultRole") // replace the default with a custom EMR role for the EC2 instance profile if one is used
