@@ -23,11 +23,11 @@ public class ModelClassifier
 		String[] a = {"freq", "prob", "PMI", "ttest"};
 		String[] b = {"distManhattan", "distEuclidean", "simCosine", "simJaccard", "simDice", "simJS"};
 		ArrayList<Attribute> attributes = new ArrayList<>(a.length * b.length);
-		for (int i = 0; i < a.length; i++)
+		for (String value : a)
 		{
-			for (int j = 0; j < b.length; j++)
+			for (String s : b)
 			{
-				attributes.add(new Attribute(a[i] + "_" + b[j]));
+				attributes.add(new Attribute(value + "_" + s));
 			}
 		}
 
