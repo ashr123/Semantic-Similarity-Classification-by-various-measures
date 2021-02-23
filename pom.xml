@@ -22,7 +22,7 @@
 			<id>ashr</id>
 			<name>Roy Ash</name>
 			<email>roy.ash456@gmail.com</email>
-			<url>https://www.linkedin.com/in/roy-ash-222351148</url>
+			<url>https://www.linkedin.com/in/roy-ash</url>
 			<roles>
 				<role>architect</role>
 				<role>developer</role>
@@ -43,6 +43,18 @@
 			<timezone>Asia/Jerusalem</timezone>
 		</developer>
 	</developers>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>RELEASE</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
@@ -66,6 +78,10 @@
 			<groupId>org.apache.opennlp</groupId>
 			<artifactId>opennlp-tools</artifactId>
 			<version>1.9.3</version>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
 		</dependency>
 		<!--		&lt;!&ndash; https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j &ndash;&gt;-->
 <!--		<dependency>-->

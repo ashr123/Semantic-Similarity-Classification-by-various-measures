@@ -1,7 +1,10 @@
 package il.co.dsp211.assignment3.steps.step1;
 
 import com.amazonaws.util.StringInputStream;
-import il.co.dsp211.assignment3.steps.step1.jobs.*;
+import il.co.dsp211.assignment3.steps.step1.jobs.BuildCoVectors;
+import il.co.dsp211.assignment3.steps.step1.jobs.BuildDistancesVectors;
+import il.co.dsp211.assignment3.steps.step1.jobs.CorpusPairFilter;
+import il.co.dsp211.assignment3.steps.step1.jobs.CorpusWordCount;
 import il.co.dsp211.assignment3.steps.utils.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -15,16 +18,22 @@ import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import weka.classifiers.functions.MultilayerPerceptron;
-import weka.core.Debug;
-import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Normalize;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.SequenceInputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.Enumeration;
+import java.util.Iterator;
 
-public class EMR {
-	public static void main(String... args) throws Exception {
+public class EMR
+{
+	public static void main(String... args) throws Exception
+	{
 		boolean jobStatus;
 		final Configuration conf = new Configuration();
 
@@ -55,7 +64,7 @@ public class EMR {
 		FileOutputFormat.setOutputPath(job1, new Path(args[0] + "Step1Output-CorpusWordCount"));
 
 		System.out.println("Done building!\n" +
-				"Starting job 1 - Corpus Word Count...");
+		                   "Starting job 1 - Corpus Word Count...");
 		System.out.println("Job 1 - Corpus Word Count: completed with success status: " + (jobStatus = job1.waitForCompletion(true)) + "!");
 
 		if (!jobStatus)
@@ -91,7 +100,7 @@ public class EMR {
 		FileOutputFormat.setOutputPath(job2, new Path(args[0] + "Step2Output-CorpusPairFilter"));
 
 		System.out.println("Done building!\n" +
-				"Starting job 2 - CorpusPairFilter...");
+		                   "Starting job 2 - CorpusPairFilter...");
 		System.out.println("Job 2 - CorpusPairFilter: completed with success status: " + (jobStatus = job2.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;
@@ -120,7 +129,7 @@ public class EMR {
 		FileOutputFormat.setOutputPath(job3, new Path(args[0] + "Step3Output-BuildCoVectors"));
 
 		System.out.println("Done building!\n" +
-				"Starting job 3 - BuildCoVectors...");
+		                   "Starting job 3 - BuildCoVectors...");
 		System.out.println("Job 3 - BuildCoVectors: completed with success status: " + (jobStatus = job3.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;
@@ -149,53 +158,12 @@ public class EMR {
 		FileOutputFormat.setOutputPath(job4, new Path(args[0] + "Step4Output-BuildDistancesVectors"));
 
 		System.out.println("Done building!\n" +
-				"Starting job 4 - BuildDistancesVectors...");
+		                   "Starting job 4 - BuildDistancesVectors...");
 		System.out.println("Job 4 - BuildDistancesVectors: completed with success status: " + (jobStatus = job4.waitForCompletion(true)) + "!");
 		if (!jobStatus)
 			return;
 
 		//--------------------------------------------------------------------------------------------------------------
-
-		// TODO: Create ARFF File
-		/*
-
-			@relation "Word Relatedness"
-
-			@attribute freq_distManhattan real
-			@attribute freq_distEuclidean real
-			@attribute freq_simCosine real
-			@attribute freq_simJaccard real
-			@attribute freq_simDice real
-			@attribute freq_simJS real
-
-			@attribute prob_distManhattan real
-			@attribute prob_distEuclidean real
-			@attribute prob_simCosine real
-			@attribute prob_simJaccard real
-			@attribute prob_simDice real
-			@attribute prob_simJS real
-
-			@attribute PMI_distManhattan real
-			@attribute PMI_distEuclidean real
-			@attribute PMI_simCosine real
-			@attribute PMI_simJaccard real
-			@attribute PMI_simDice real
-			@attribute PMI_simJS real
-
-			@attribute ttest_distManhattan real
-			@attribute ttest_distEuclidean real
-			@attribute ttest_simCosine real
-			@attribute ttest_simJaccard real
-			@attribute ttest_simDice real
-			@attribute ttest_simJS real
-
-			@attribute class {similar, not-similar}
-
-			@data
-			TBD
-
-		 */
-
 		// Generate Model
 
 		// TODO: FIX PATHS
@@ -207,42 +175,11 @@ public class EMR {
 		 */
 
 		try (FileSystem fileSystem = FileSystem.get(conf);
-		     BufferedReader arff = new BufferedReader(new InputStreamReader(new SequenceInputStream(new StringInputStream(
-				     "@relation \"Word Relatedness\"\n" +
-						     "\n" +
-						     "@attribute freq_distManhattan real\n" +
-						     "@attribute freq_distEuclidean real\n" +
-						     "@attribute freq_simCosine real\n" +
-						     "@attribute freq_simJaccard real\n" +
-						     "@attribute freq_simDice real\n" +
-						     "@attribute freq_simJS real\n" +
-						     "\n" +
-						     "@attribute prob_distManhattan real\n" +
-						     "@attribute prob_distEuclidean real\n" +
-						     "@attribute prob_simCosine real\n" +
-						     "@attribute prob_simJaccard real\n" +
-						     "@attribute prob_simDice real\n" +
-						     "@attribute prob_simJS real\n" +
-						     "\n" +
-						     "@attribute PMI_distManhattan real\n" +
-						     "@attribute PMI_distEuclidean real\n" +
-						     "@attribute PMI_simCosine real\n" +
-						     "@attribute PMI_simJaccard real\n" +
-						     "@attribute PMI_simDice real\n" +
-						     "@attribute PMI_simJS real\n" +
-						     "\n" +
-						     "@attribute ttest_distManhattan real\n" +
-						     "@attribute ttest_distEuclidean real\n" +
-						     "@attribute ttest_simCosine real\n" +
-						     "@attribute ttest_simJaccard real\n" +
-						     "@attribute ttest_simDice real\n" +
-						     "@attribute ttest_simJS real\n" +
-						     "\n" +
-						     "@attribute class {similar, not-similar}\n" +
-						     "\n" +
-						     "@data\n"
-		     ),
-				     fileSystem.open(new Path(args[0] + "Step4Output-BuildDistancesVectors")))))) {
+		     S3Client s3Client = S3Client.builder()
+				     .region(Region.US_EAST_1)
+				     .build();
+		     BufferedReader arff = new BufferedReader(new InputStreamReader(bucketBatch(s3Client, args[0], "Step4Output-BuildDistancesVectors/"))))
+		{
 
 			arff.lines().forEach(System.out::println);
 
@@ -314,5 +251,91 @@ public class EMR {
 		System.out.println("Job 5 completed with success status: " + job5.waitForCompletion(true) + "!\n" +
 		                   "Exiting...");
 		*/
+	}
+
+	private static SequenceInputStream bucketBatch(S3Client s3Client, String bucketName, String folderPrefix) throws UnsupportedEncodingException
+	{
+		System.out.println("Deleting bucket Batch...");
+
+		// To delete a bucket, all the objects in the bucket must be deleted first
+		ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
+				.bucket(bucketName)
+				.prefix(folderPrefix)
+				.build();
+		ListObjectsV2Response listObjectsV2Response;
+
+		SequenceInputStream sequenceInputStream = null;
+		do
+		{
+			listObjectsV2Response = s3Client.listObjectsV2(listObjectsV2Request);
+			if (!listObjectsV2Response.contents().isEmpty())
+			{
+				ListObjectsV2Response finalListObjectsV2Response = listObjectsV2Response;
+				sequenceInputStream = new SequenceInputStream(sequenceInputStream == null ? new StringInputStream(
+						"@relation \"Word Relatedness\"\n" +
+						"\n" +
+						"@attribute freq_distManhattan real\n" +
+						"@attribute freq_distEuclidean real\n" +
+						"@attribute freq_simCosine real\n" +
+						"@attribute freq_simJaccard real\n" +
+						"@attribute freq_simDice real\n" +
+						"@attribute freq_simJS real\n" +
+						"\n" +
+						"@attribute prob_distManhattan real\n" +
+						"@attribute prob_distEuclidean real\n" +
+						"@attribute prob_simCosine real\n" +
+						"@attribute prob_simJaccard real\n" +
+						"@attribute prob_simDice real\n" +
+						"@attribute prob_simJS real\n" +
+						"\n" +
+						"@attribute PMI_distManhattan real\n" +
+						"@attribute PMI_distEuclidean real\n" +
+						"@attribute PMI_simCosine real\n" +
+						"@attribute PMI_simJaccard real\n" +
+						"@attribute PMI_simDice real\n" +
+						"@attribute PMI_simJS real\n" +
+						"\n" +
+						"@attribute ttest_distManhattan real\n" +
+						"@attribute ttest_distEuclidean real\n" +
+						"@attribute ttest_simCosine real\n" +
+						"@attribute ttest_simJaccard real\n" +
+						"@attribute ttest_simDice real\n" +
+						"@attribute ttest_simJS real\n" +
+						"\n" +
+						"@attribute class {similar, not-similar}\n" +
+						"\n" +
+						"@data\n") : sequenceInputStream,
+						new SequenceInputStream(new Enumeration<ResponseInputStream<GetObjectResponse>>()
+						{
+							private final Iterator<ResponseInputStream<GetObjectResponse>> iterator = finalListObjectsV2Response.contents().stream()
+									.map(S3Object::key)
+									.peek(key -> System.out.println("key: " + key))
+									.filter(key -> key.startsWith("part-r-"))
+									.map(key -> s3Client.getObject(GetObjectRequest.builder()
+											.bucket(bucketName)
+											.key(key)
+											.build()))
+									.iterator();
+
+							@Override
+							public boolean hasMoreElements()
+							{
+								return iterator.hasNext();
+							}
+
+							@Override
+							public ResponseInputStream<GetObjectResponse> nextElement()
+							{
+								return iterator.next();
+							}
+						}));
+
+				listObjectsV2Request = ListObjectsV2Request.builder()
+						.bucket(bucketName)
+						.continuationToken(listObjectsV2Response.nextContinuationToken())
+						.build();
+			}
+		} while (listObjectsV2Response.isTruncated());
+		return sequenceInputStream;
 	}
 }
