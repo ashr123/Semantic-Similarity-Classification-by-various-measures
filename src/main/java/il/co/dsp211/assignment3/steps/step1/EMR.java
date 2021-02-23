@@ -188,7 +188,7 @@ public class EMR
 
 			// Evaluate classifier with test dataset
 			String evalsummary = mg.evaluateModel(ann, traindataset, testdataset);
-			System.out.println("Evaluation: " + evalsummary);
+			System.out.println("Evaluation:\n" + evalsummary);
 
 			/*
 			//Save model
