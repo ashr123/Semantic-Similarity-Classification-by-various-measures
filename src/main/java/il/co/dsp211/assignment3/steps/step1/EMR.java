@@ -192,11 +192,14 @@ public class EMR
 			dataset.randomize(new Debug.Random(1));// if you comment this line the accuracy of the model will be dropped from 96.6% to 80%
 
 			//Normalize dataset
-			filter.setInputFormat(dataset);
-			Instances datasetnor = Filter.useFilter(dataset, filter);
+//			filter.setInputFormat(dataset);
+//			Instances datasetnor = Filter.useFilter(dataset, filter);
 
-			Instances traindataset = new Instances(datasetnor, 0, trainSize);
-			Instances testdataset = new Instances(datasetnor, trainSize, testSize);
+//			Instances traindataset = new Instances(datasetnor, 0, trainSize);
+//			Instances testdataset = new Instances(datasetnor, trainSize, testSize);
+
+			Instances traindataset = new Instances(dataset, 0, trainSize);
+			Instances testdataset = new Instances(dataset, trainSize, testSize);
 
 			// build classifier with train dataset
 			MultilayerPerceptron ann = (MultilayerPerceptron) mg.buildClassifier(traindataset);

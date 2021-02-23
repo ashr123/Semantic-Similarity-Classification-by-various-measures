@@ -8,6 +8,7 @@ import weka.core.SerializationHelper;
 import weka.core.converters.ConverterUtils.DataSource;
 
 import java.io.InputStream;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,13 +66,25 @@ public class ModelGenerator
 		{
 			// Evaluate classifier with test dataset
 			eval = new Evaluation(traindataset);
-			eval.evaluateModel(model, testdataset);
+
+			/*
+			eval.crossValidateModel(model, traindataset, 10, new Random());
+			eval.recall(1);
+			eval.precision(1);
+			eval.fMeasure(1);
+			 */
+
+			eval.recall(1);
+			eval.precision(1);
+			eval.fMeasure(1);
+			eval.crossValidateModel(model, testdataset, 10, new Random());
+//			eval.evaluateModel(model, testdataset);
 		}
 		catch (Exception ex)
 		{
 			Logger.getLogger(ModelGenerator.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		return eval.toSummaryString("", true);
+		return eval.toSummaryString(true);
 	}
 
 	public void saveModel(Classifier model, String modelpath)
