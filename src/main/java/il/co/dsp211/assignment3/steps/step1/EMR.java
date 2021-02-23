@@ -59,7 +59,7 @@ public class EMR
 		job1.setOutputKeyClass(StringStringPair.class);
 		job1.setOutputValueClass(LongWritable.class);
 
-		final Path corpusPath = new Path("s3://assignment3dsp/biarcs/biarcs.00-of-99");
+		final Path corpusPath = new Path("s3://assignment3dsp/biarcs" + (Boolean.parseBoolean(args[1]) ? "/biarcs.00-of-99" : ""));
 		FileInputFormat.addInputPath(job1, corpusPath);
 		FileOutputFormat.setOutputPath(job1, new Path(args[0] + "Step1Output-CorpusWordCount"));
 
