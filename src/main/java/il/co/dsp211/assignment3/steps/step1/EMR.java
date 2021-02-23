@@ -248,6 +248,7 @@ public class EMR
 
 	public static SequenceInputStream bucketBatch(S3Client s3Client, String bucketName, String folderPrefix) throws UnsupportedEncodingException
 	{
+		// To delete a bucket, all the objects in the bucket must be deleted first
 		ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
 				.bucket(bucketName)
 				.prefix(folderPrefix)
