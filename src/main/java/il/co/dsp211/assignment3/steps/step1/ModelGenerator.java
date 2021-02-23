@@ -50,7 +50,6 @@ public class ModelGenerator
 		try
 		{
 			m.buildClassifier(traindataset);
-
 		}
 		catch (Exception ex)
 		{
@@ -67,16 +66,6 @@ public class ModelGenerator
 			// Evaluate classifier with test dataset
 			eval = new Evaluation(traindataset);
 
-			/*
-			eval.crossValidateModel(model, traindataset, 10, new Random());
-			eval.recall(1);
-			eval.precision(1);
-			eval.fMeasure(1);
-			 */
-
-			eval.recall(1);
-			eval.precision(1);
-			eval.fMeasure(1);
 			eval.crossValidateModel(model, testdataset, 10, new Random());
 //			eval.evaluateModel(model, testdataset);
 		}
@@ -84,12 +73,15 @@ public class ModelGenerator
 		{
 			Logger.getLogger(ModelGenerator.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		return eval.toSummaryString(true);
+		return new StringBuilder(eval.toSummaryString(true)).append('\n')
+				.append("Recall:\t").append(eval.recall(1)).append('\n')
+				.append("Precision:\t").append(eval.precision(1)).append('\n')
+				.append("F1:\t").append(eval.fMeasure(1)).append('\n')
+				.toString();
 	}
 
 	public void saveModel(Classifier model, String modelpath)
 	{
-
 		try
 		{
 			SerializationHelper.write(modelpath, model);
