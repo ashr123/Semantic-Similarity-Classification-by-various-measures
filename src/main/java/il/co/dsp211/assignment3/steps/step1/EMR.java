@@ -178,7 +178,7 @@ public class EMR
 		try (S3Client s3Client = S3Client.builder()
 				     .region(Region.of(args[5]))
 				     .build();
-		     BufferedReader arff = new BufferedReader(new InputStreamReader(bucketBatch(s3Client, args[0].substring(5), "Step4Output-BuildDistancesVectors/"))))
+		     BufferedReader arff = new BufferedReader(new InputStreamReader(bucketBatch(s3Client, args[0].substring(5, args[0].length() - 1), "Step4Output-BuildDistancesVectors/"))))
 		{
 
 			arff.lines().forEach(System.out::println);
@@ -255,9 +255,6 @@ public class EMR
 
 	private static SequenceInputStream bucketBatch(S3Client s3Client, String bucketName, String folderPrefix) throws UnsupportedEncodingException
 	{
-		System.out.println("Deleting bucket Batch...");
-
-		// To delete a bucket, all the objects in the bucket must be deleted first
 		ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
 				.bucket(bucketName)
 				.prefix(folderPrefix)
