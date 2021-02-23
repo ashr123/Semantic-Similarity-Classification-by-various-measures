@@ -1,7 +1,10 @@
 package il.co.dsp211.assignment3.steps.step1;
 
 import com.amazonaws.util.StringInputStream;
-import il.co.dsp211.assignment3.steps.step1.jobs.*;
+import il.co.dsp211.assignment3.steps.step1.jobs.BuildCoVectors;
+import il.co.dsp211.assignment3.steps.step1.jobs.BuildDistancesVectors;
+import il.co.dsp211.assignment3.steps.step1.jobs.CorpusPairFilter;
+import il.co.dsp211.assignment3.steps.step1.jobs.CorpusWordCount;
 import il.co.dsp211.assignment3.steps.utils.*;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;

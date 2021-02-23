@@ -1,4 +1,4 @@
-package il.co.dsp211.assignment3.steps.step1.jobs;
+package il.co.dsp211.assignment3.steps.step1;
 
 import java.io.InputStream;
 import java.util.logging.Level;

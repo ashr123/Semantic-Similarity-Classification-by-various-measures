@@ -1,6 +1,6 @@
 package il.co.dsp211.assignment3.steps.utils;
 
-import opennlp.tools.stemmer.PorterStemmer; // TODO: SWITCH TO SnowBall Stemmer
+import opennlp.tools.stemmer.PorterStemmer;
 import org.apache.hadoop.conf.Configuration;
 
 import java.io.BufferedReader;
