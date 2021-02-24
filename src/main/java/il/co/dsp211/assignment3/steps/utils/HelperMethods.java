@@ -64,7 +64,15 @@ public class HelperMethods
 			listObjectsV2Response = s3Client.listObjectsV2(listObjectsV2Request);
 			if (!listObjectsV2Response.contents().isEmpty())
 			{
-				ListObjectsV2Response finalListObjectsV2Response = listObjectsV2Response;
+				final Iterator<ResponseInputStream<GetObjectResponse>> iterator = listObjectsV2Response.contents().stream()
+						.map(S3Object::key)
+						.filter(key -> key.contains("part-r-"))
+						.peek(key -> System.out.println("Collecting file: " + key))
+						.map(key -> s3Client.getObject(GetObjectRequest.builder()
+								.bucket(bucketName)
+								.key(key)
+								.build()))
+						.iterator();
 				sequenceInputStream = new SequenceInputStream(sequenceInputStream == null ? new StringInputStream(
 						"@relation \"Word Relatedness\"\n" +
 						"\n" +
@@ -101,16 +109,6 @@ public class HelperMethods
 						"@data\n") : sequenceInputStream,
 						new SequenceInputStream(new Enumeration<ResponseInputStream<GetObjectResponse>>()
 						{
-							private final Iterator<ResponseInputStream<GetObjectResponse>> iterator = finalListObjectsV2Response.contents().stream()
-									.map(S3Object::key)
-									.filter(key -> key.contains("part-r-"))
-									.peek(key -> System.out.println("Collecting file: " + key))
-									.map(key -> s3Client.getObject(GetObjectRequest.builder()
-											.bucket(bucketName)
-											.key(key)
-											.build()))
-									.iterator();
-
 							@Override
 							public boolean hasMoreElements()
 							{
