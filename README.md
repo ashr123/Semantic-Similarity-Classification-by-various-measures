@@ -230,7 +230,21 @@ TODO: ...
 
 ## Running Instructions
 
-TODO: ...
+1. Create an S3 bucket.
+2. Compile the project and create a jar with `il/co/dsp211/assignment3/steps/step1/EMR.java` as your main class.
+3. Upload your jar to your S3 bucket (you can use `upload.sh` for help, it requires `aws-cli`).
+4. Fill `config.properties` file with the followings:
+	1. `bucketName` - The name of your bucket you've created at step 1, for saving temporary and final results and logs.
+	2. `jarFileName` - The name of the jar you've created at step 2 **without extension**.
+	3. `instanceCount` - The number of EC2 instances in the cluster.
+	4. `region` - The region of your cluster you want to create.
+	5. `isReadSubset` - `true` for reading only thie first file, `false` for reading all the 15 files.
+    6. `goldenStandardFileName` - The name of the file that represents the golden-standard for the corpus, must be saved inside `resources` folder.
+    7. `numOfFeaturesToSkip` - Number of most common features to be skipped.
+    8. `numOfFeatures` - Controlls the emmbeding-space. determains the length of the CoVectors that represents each word.
+5. Run `il/co/dsp211/assignment3/Main.java`.
+6. The final output will be presented inside `s3://<your-bucket-name>/logs/<automated-AWS-EMR-given-cluster-id>/steps/<automated-AWS-EMR-given-step-id>/stdout.gz` file.
+7. The generated model is `s3://<your-bucket-name>/model.bin`.
 
 ## Citations
 

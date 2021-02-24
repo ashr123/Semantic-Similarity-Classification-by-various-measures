@@ -1,6 +1,5 @@
 package il.co.dsp211.assignment3.steps.step1;
 
-import com.amazonaws.util.StringInputStream;
 import il.co.dsp211.assignment3.steps.step1.jobs.BuildCoVectors;
 import il.co.dsp211.assignment3.steps.step1.jobs.BuildDistancesVectors;
 import il.co.dsp211.assignment3.steps.step1.jobs.CorpusPairFilter;
@@ -17,22 +16,15 @@ import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
-import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import weka.classifiers.Classifier;
-import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.Debug;
-import weka.core.Instance;
 import weka.core.Instances;
 
 import java.io.InputStream;
-import java.io.SequenceInputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.Enumeration;
-import java.util.Iterator;
 
 public class EMR
 {
@@ -172,7 +164,7 @@ public class EMR
 		try (S3Client s3Client = S3Client.builder()
 				.region(Region.of(args[5]))
 				.build();
-		     InputStream arff = bucketBatch(s3Client, bucketName, "Step4Output-BuildDistancesVectors/"))
+		     InputStream arff = HelperMethods.bucketBatch(s3Client, bucketName, "Step4Output-BuildDistancesVectors/"))
 		{
 			Instances dataset = mg.loadDataset(arff);
 
@@ -199,91 +191,7 @@ public class EMR
 					.build(), RequestBody.fromBytes(HelperMethods.objectToBytes(ann)));
 		}
 
-		System.out.println("WEKA completed successfully" + "\n" +
+		System.out.println("WEKA completed successfully\n" +
 		                   "Exiting...");
-	}
-
-	public static SequenceInputStream bucketBatch(S3Client s3Client, String bucketName, String folderPrefix) throws UnsupportedEncodingException
-	{
-		// To delete a bucket, all the objects in the bucket must be deleted first
-		ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
-				.bucket(bucketName)
-				.prefix(folderPrefix)
-				.build();
-		ListObjectsV2Response listObjectsV2Response;
-
-		SequenceInputStream sequenceInputStream = null;
-		do
-		{
-			listObjectsV2Response = s3Client.listObjectsV2(listObjectsV2Request);
-			if (!listObjectsV2Response.contents().isEmpty())
-			{
-				ListObjectsV2Response finalListObjectsV2Response = listObjectsV2Response;
-				sequenceInputStream = new SequenceInputStream(sequenceInputStream == null ? new StringInputStream(
-						"@relation \"Word Relatedness\"\n" +
-						"\n" +
-						"@attribute freq_distManhattan real\n" +
-						"@attribute freq_distEuclidean real\n" +
-						"@attribute freq_simCosine real\n" +
-						"@attribute freq_simJaccard real\n" +
-						"@attribute freq_simDice real\n" +
-						"@attribute freq_simJS real\n" +
-						"\n" +
-						"@attribute prob_distManhattan real\n" +
-						"@attribute prob_distEuclidean real\n" +
-						"@attribute prob_simCosine real\n" +
-						"@attribute prob_simJaccard real\n" +
-						"@attribute prob_simDice real\n" +
-						"@attribute prob_simJS real\n" +
-						"\n" +
-						"@attribute PMI_distManhattan real\n" +
-						"@attribute PMI_distEuclidean real\n" +
-						"@attribute PMI_simCosine real\n" +
-						"@attribute PMI_simJaccard real\n" +
-						"@attribute PMI_simDice real\n" +
-						"@attribute PMI_simJS real\n" +
-						"\n" +
-						"@attribute ttest_distManhattan real\n" +
-						"@attribute ttest_distEuclidean real\n" +
-						"@attribute ttest_simCosine real\n" +
-						"@attribute ttest_simJaccard real\n" +
-						"@attribute ttest_simDice real\n" +
-						"@attribute ttest_simJS real\n" +
-						"\n" +
-						"@attribute class {true, false}\n" +
-						"\n" +
-						"@data\n") : sequenceInputStream,
-						new SequenceInputStream(new Enumeration<ResponseInputStream<GetObjectResponse>>()
-						{
-							private final Iterator<ResponseInputStream<GetObjectResponse>> iterator = finalListObjectsV2Response.contents().stream()
-									.map(S3Object::key)
-									.filter(key -> key.contains("part-r-"))
-									.peek(key -> System.out.println("Collecting file: " + key))
-									.map(key -> s3Client.getObject(GetObjectRequest.builder()
-											.bucket(bucketName)
-											.key(key)
-											.build()))
-									.iterator();
-
-							@Override
-							public boolean hasMoreElements()
-							{
-								return iterator.hasNext();
-							}
-
-							@Override
-							public ResponseInputStream<GetObjectResponse> nextElement()
-							{
-								return iterator.next();
-							}
-						}));
-
-				listObjectsV2Request = ListObjectsV2Request.builder()
-						.bucket(bucketName)
-						.continuationToken(listObjectsV2Response.nextContinuationToken())
-						.build();
-			}
-		} while (listObjectsV2Response.isTruncated());
-		return sequenceInputStream;
 	}
 }
