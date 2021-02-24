@@ -16,6 +16,7 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
 
 public class ModelAnalysis
 {
@@ -50,41 +51,30 @@ public class ModelAnalysis
 		{
 			arff.lines().forEach(new Consumer<String>()
 			{
-				//classifiy a single instance
 				final ModelClassifier cls = new ModelClassifier();
 				final double[] vector24D = new double[25];
 				boolean isEven = false;
 				String wordPair;
-				boolean isWordPairSimilar;
 
 				@Override
 				public void accept(String line)
 				{
-					if (line.isEmpty())
-					{
-						System.out.println("Line is empty!");
-						return;
-					}
 					if (!isEven)
 					{
 						wordPair = line;
 					} else
 					{
-						String[] split = line.split("[,\t]");
-						for (int i = 0; i < split.length - 1; i++)
-						{
-							vector24D[i] = split[i].equals("?") ? Double.NaN : Double.parseDouble(split[i]);
-						}
-						vector24D[vector24D.length - 1] = 0;
-						isWordPairSimilar = Boolean.parseBoolean(split[split.length - 1]);
+						final String[] split = line.split("[,\t]");
+						IntStream.range(0, split.length - 1).parallel()
+								.forEach(i -> vector24D[i] = split[i].equals("?") ? Double.NaN : Double.parseDouble(split[i]));
+						final boolean isWordPairSimilar = Boolean.parseBoolean(split[split.length - 1]);
+						vector24D[24] = isWordPairSimilar ? 0 : 1;
+						final boolean wordPairResultPrediction = Boolean.parseBoolean(cls.classifiy(cls.createInstance(vector24D), "model.bin"));
 
-						String classname = cls.classifiy(cls.createInstance(vector24D), "model.bin");
-						boolean wordPairResultPrediction = Boolean.parseBoolean(classname);
-
-						if (isWordPairSimilar == true && wordPairResultPrediction == false)
-							System.out.println("False Negative:" + wordPair);
-						else if (isWordPairSimilar == false && wordPairResultPrediction == true)
-							System.out.println("False Positive:" + wordPair);
+						if (isWordPairSimilar && !wordPairResultPrediction)
+							System.out.println("False Negative: " + wordPair);
+						else if (!isWordPairSimilar && wordPairResultPrediction)
+							System.out.println("False Positive: " + wordPair);
 					}
 					isEven = !isEven;
 				}
