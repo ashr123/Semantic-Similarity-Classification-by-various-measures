@@ -1,6 +1,5 @@
 package il.co.dsp211.assignment3;
 
-import com.amazonaws.util.StringInputStream;
 import il.co.dsp211.assignment3.steps.step1.ModelClassifier;
 import il.co.dsp211.assignment3.steps.utils.HelperMethods;
 import org.apache.log4j.BasicConfigurator;
@@ -93,7 +92,7 @@ public class ModelAnalysis
 		}
 	}
 
-	public static SequenceInputStream loadData(S3Client s3Client, String bucketName, String folderPrefix) throws UnsupportedEncodingException
+	public static SequenceInputStream loadData(S3Client s3Client, String bucketName, String folderPrefix)
 	{
 		// To delete a bucket, all the objects in the bucket must be deleted first
 		ListObjectsV2Request listObjectsV2Request = ListObjectsV2Request.builder()
@@ -131,7 +130,7 @@ public class ModelAnalysis
 						return iterator.next();
 					}
 				});
-				sequenceInputStream = sequenceInputStream == null ? sequence : new SequenceInputStream( sequenceInputStream, sequence);
+				sequenceInputStream = sequenceInputStream == null ? sequence : new SequenceInputStream(sequenceInputStream, sequence);
 
 				listObjectsV2Request = ListObjectsV2Request.builder()
 						.bucket(bucketName)
