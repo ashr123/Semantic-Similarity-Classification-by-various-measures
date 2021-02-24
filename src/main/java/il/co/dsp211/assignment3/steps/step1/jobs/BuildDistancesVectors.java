@@ -100,7 +100,7 @@ public class BuildDistancesVectors
 							sumArrayManhattanTemp[3] += Math.abs(vector8_word1[i].get() - vector8_word2[i].get());
 
 							// Dist - Euclidean - Calc ✓
-							sumArrayEuclideanTemp[0] += 1 << (vector5_word1[i].get() - vector5_word2[i].get());
+							sumArrayEuclideanTemp[0] += 1 << Math.abs(vector5_word1[i].get() - vector5_word2[i].get());
 							sumArrayEuclideanTemp[1] += Math.pow(vector6_word1[i].get() - vector6_word2[i].get(), 2);
 							sumArrayEuclideanTemp[2] += Math.pow(vector7_word1[i].get() - vector7_word2[i].get(), 2);
 							sumArrayEuclideanTemp[3] += Math.pow(vector8_word1[i].get() - vector8_word2[i].get(), 2);
@@ -111,12 +111,12 @@ public class BuildDistancesVectors
 							sumMulTemp[2] += vector7_word1[i].get() * vector7_word2[i].get();
 							sumMulTemp[3] += vector8_word1[i].get() * vector8_word2[i].get();
 
-							sumV1SquareTemp[0] += 1 << vector5_word1[i].get();
+							sumV1SquareTemp[0] += 1 << Math.abs(vector5_word1[i].get());
 							sumV1SquareTemp[1] += Math.pow(vector6_word1[i].get(), 2);
 							sumV1SquareTemp[2] += Math.pow(vector7_word1[i].get(), 2);
 							sumV1SquareTemp[3] += Math.pow(vector8_word1[i].get(), 2);
 
-							sumV2SquareTemp[0] += 1 << vector5_word2[i].get();
+							sumV2SquareTemp[0] += 1 << Math.abs(vector5_word2[i].get());
 							sumV2SquareTemp[1] += Math.pow(vector6_word2[i].get(), 2);
 							sumV2SquareTemp[2] += Math.pow(vector7_word2[i].get(), 2);
 							sumV2SquareTemp[3] += Math.pow(vector8_word2[i].get(), 2);
@@ -166,6 +166,7 @@ public class BuildDistancesVectors
 							vector24D[i * 6 + 5] = new DoubleWritable(sumD1Temp[i] + sumD2Temp[i]);
 						});
 
+//						context.write(new Text(next.getKey()), new Text(key.getKey()));
 						context.write(new ArrayWritable(DoubleWritable.class, vector24D),
 								new BooleanWritable(GoldenStandard.getGoldenStandard(context.getConfiguration())
 										.get(next.getKey())
