@@ -18,11 +18,14 @@ import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.SequenceFileOutputFormat;
 import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import weka.classifiers.Classifier;
 import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.Debug;
+import weka.core.Instance;
 import weka.core.Instances;
 
 import java.io.InputStream;
@@ -165,10 +168,11 @@ public class EMR
 		// Generate Model
 		final ModelGenerator mg = new ModelGenerator();
 
+		String bucketName = args[0].substring(5, args[0].length() - 1);
 		try (S3Client s3Client = S3Client.builder()
 				.region(Region.of(args[5]))
 				.build();
-		     InputStream arff = bucketBatch(s3Client, args[0].substring(5, args[0].length() - 1), "Step4Output-BuildDistancesVectors/"))
+		     InputStream arff = bucketBatch(s3Client, bucketName, "Step4Output-BuildDistancesVectors/"))
 		{
 			Instances dataset = mg.loadDataset(arff);
 
@@ -182,21 +186,18 @@ public class EMR
 			Instances testdataset = new Instances(dataset, trainSize, testSize);
 
 			// build classifier with train dataset
-			MultilayerPerceptron ann = (MultilayerPerceptron) mg.buildClassifier(traindataset);
+			Classifier ann = mg.buildClassifier(traindataset);
 
 			// Evaluate classifier with test dataset
 			String evalsummary = mg.evaluateModel(ann, traindataset, testdataset);
 			System.out.println("Evaluation:\n" + evalsummary);
 
-			/*
 			//Save model
-			mg.saveModel(ann, MODElPATH);
-
-			//classifiy a single instance
-			ModelClassifier cls = new ModelClassifier();
-			String classname =cls.classifiy(Filter.useFilter(cls.createInstance(1.6, 0.2, 0), filter), MODElPATH);
-			System.out.println("\n The class name for the instance with petallength = 1.6 and petalwidth =0.2 is  " +classname);
-			*/
+			// TODO: Check if works correctly
+			s3Client.putObject(PutObjectRequest.builder()
+					.bucket(bucketName)
+					.key("model.bin")
+					.build(), RequestBody.fromBytes(HelperMethods.objectToBytes(ann)));
 		}
 
 		System.out.println("WEKA completed successfully" + "\n" +

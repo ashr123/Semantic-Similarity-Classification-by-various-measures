@@ -1,5 +1,6 @@
 package il.co.dsp211.assignment3.steps.step1;
 
+import software.amazon.awssdk.services.s3.S3Client;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.functions.MultilayerPerceptron;
@@ -67,7 +68,6 @@ public class ModelGenerator
 			eval = new Evaluation(traindataset);
 
 			eval.crossValidateModel(model, testdataset, 10, new Random());
-//			eval.evaluateModel(model, testdataset);
 		}
 		catch (Exception ex)
 		{
@@ -78,18 +78,6 @@ public class ModelGenerator
 				.append("Precision:\t").append(eval.precision(1)).append('\n')
 				.append("F1:\t").append(eval.fMeasure(1)).append('\n')
 				.toString();
-	}
-
-	public void saveModel(Classifier model, String modelpath)
-	{
-		try
-		{
-			SerializationHelper.write(modelpath, model);
-		}
-		catch (Exception ex)
-		{
-			Logger.getLogger(ModelGenerator.class.getName()).log(Level.SEVERE, null, ex);
-		}
 	}
 
 }
