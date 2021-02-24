@@ -234,10 +234,6 @@ TODO: ...
 
 ## Citations
 
-* [N. Ljubesic, D. Boras, N. Bakaric and J. Njavro, "Comparing Measures of Semantic Similarity," ITI 2008 - 30th
-  International Conference on Information Technology Interfaces, Cavtat, Croatia, 2008, pp. 675-682, doi:
+* [N. Ljubesic, D. Boras, N. Bakaric and J. Njavro, "Comparing Measures of Semantic Similarity," ITI 2008 - 30th International Conference on Information Technology Interfaces, Cavtat, Croatia, 2008, pp. 675-682, doi:
   10.1109/ITI.2008.4588492.](Comparing-Measures-of-Semantic-Similarity.pdf)
-
-* ![קח תהנה](Comparing-Measures-of-Semantic-Similarity.pdf)
-
 * [Google Syntactic N-grams](http://commondatastorage.googleapis.com/books/syntactic-ngrams/index.html).
