@@ -24,8 +24,6 @@ import software.amazon.awssdk.services.s3.model.*;
 import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.Debug;
 import weka.core.Instances;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Normalize;
 
 import java.io.InputStream;
 import java.io.SequenceInputStream;
@@ -202,7 +200,7 @@ public class EMR
 		}
 
 		System.out.println("WEKA completed successfully" + "\n" +
-				"Exiting...");
+		                   "Exiting...");
 	}
 
 	public static SequenceInputStream bucketBatch(S3Client s3Client, String bucketName, String folderPrefix) throws UnsupportedEncodingException

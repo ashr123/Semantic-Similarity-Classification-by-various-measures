@@ -16,17 +16,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-
-public class Main {
-	static {
+public class Main
+{
+	static
+	{
 		BasicConfigurator.configure();
 		Logger.getRootLogger().setLevel(Level.INFO);
 	}
 
-	public static void main(String... args) throws IOException {
+	public static void main(String... args) throws IOException
+	{
 		System.out.println("Creating cluster...");
 		final Properties properties = new Properties();
-		try (InputStream input = new FileInputStream("config.properties")) {
+		try (InputStream input = new FileInputStream("config.properties"))
+		{
 			properties.load(input);
 		}
 

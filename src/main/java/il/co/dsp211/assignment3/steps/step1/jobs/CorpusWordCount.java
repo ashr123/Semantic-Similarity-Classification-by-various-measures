@@ -12,10 +12,12 @@ import org.apache.hadoop.mapreduce.Reducer;
 import java.io.IOException;
 import java.util.stream.StreamSupport;
 
-public class CorpusWordCount {
-	public static class WordCounterMapper extends Mapper<LongWritable, Text, StringStringPair, LongWritable> {
-		private final PorterStemmer porterStemmer = new PorterStemmer();
+public class CorpusWordCount
+{
+	public static class WordCounterMapper extends Mapper<LongWritable, Text, StringStringPair, LongWritable>
+	{
 		private static final LongWritable ONE = new LongWritable(1);
+		private final PorterStemmer porterStemmer = new PorterStemmer();
 
 		/**
 		 * @param key     ⟨line number,
@@ -23,9 +25,11 @@ public class CorpusWordCount {
 		 * @param context ⟨⟨word<sub>1</sub>, dep label⟩, 1⟩, ⟨⟨word<sub>2</sub>, dep label⟩, 1⟩, ⟨⟨word<sub>3</sub>, dep label⟩, 1⟩
 		 */
 		@Override
-		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
+		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException
+		{
 			final String[] tokens = value.toString().split("\t")[1].split(" ");
-			for (String tokensSplit : tokens) {
+			for (String tokensSplit : tokens)
+			{
 				final String[] token = tokensSplit.split("/");
 				if (token.length != 4)
 					continue;
@@ -36,11 +40,13 @@ public class CorpusWordCount {
 		}
 	}
 
-	public static class PairSummerCombinerAndReducer extends Reducer<StringStringPair, LongWritable, StringStringPair, LongWritable> {
+	public static class PairSummerCombinerAndReducer extends Reducer<StringStringPair, LongWritable, StringStringPair, LongWritable>
+	{
 		private Counter counter;
 
 		@Override
-		protected void setup(Context context) throws IOException, InterruptedException {
+		protected void setup(Context context) throws IOException, InterruptedException
+		{
 			counter = context.getCounter(NCounter.N_COUNTER);
 		}
 
@@ -50,7 +56,8 @@ public class CorpusWordCount {
 		 * @param context ⟨⟨word, dep label⟩, sum⟩
 		 */
 		@Override
-		protected void reduce(StringStringPair key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException {
+		protected void reduce(StringStringPair key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException
+		{
 			final long sum = StreamSupport.stream(values.spliterator(), false)
 					.mapToLong(LongWritable::get)
 					.sum();
