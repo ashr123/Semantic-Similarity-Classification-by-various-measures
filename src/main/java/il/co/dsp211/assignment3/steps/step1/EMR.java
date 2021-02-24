@@ -193,7 +193,6 @@ public class EMR
 			System.out.println("Evaluation:\n" + evalsummary);
 
 			//Save model
-			// TODO: Check if works correctly
 			s3Client.putObject(PutObjectRequest.builder()
 					.bucket(bucketName)
 					.key("model.bin")

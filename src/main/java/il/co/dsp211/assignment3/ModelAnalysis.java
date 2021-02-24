@@ -8,11 +8,12 @@ import org.apache.log4j.Logger;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.Properties;
+import java.util.function.Consumer;
+
+import static il.co.dsp211.assignment3.steps.step1.EMR.bucketBatch;
 
 public class ModelAnalysis {
 
@@ -28,18 +29,51 @@ public class ModelAnalysis {
 			properties.load(input);
 		}
 
-		if (!Files.exists(HelperMethods.pathOf("model.bin")))
+		if (!Files.exists(HelperMethods.pathOf("model.bin"))) {
 			try (S3Client s3Client = S3Client.builder()
 					.region(Region.of(properties.getProperty("region").toLowerCase().replace('_', '-')))
 					.build();
 			) {
 				HelperMethods.downloadFileFromS3Bucket(s3Client, properties.getProperty("bucketName"), "model.bin");
 			}
+		}
 
 		//classifiy a single instance
 		ModelClassifier cls = new ModelClassifier();
-		String classname = cls.classifiy(cls.createInstance(49.0, Double.NaN, Double.NaN, 0.11954765751211632, 0.21203438395415472, Double.NaN, 0.01342947658337052, 0.003050110981127867, 0.20497174173280414, 0.08748953264070679, 0.16144789226761383, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, 0.019105725857922466, 0.0012918267776457278, 0.2835473161540472, 5.613983846724007, 1.6783791937585641, Double.NaN, 0), "model.bin");
 
-		System.out.println("<restaur, abund> is " + classname);
+		try (S3Client s3Client = S3Client.builder()
+				.region(Region.of(properties.getProperty("region").toLowerCase().replace('_', '-')))
+				.build();
+		     BufferedReader arff = new BufferedReader(new InputStreamReader(bucketBatch(s3Client, properties.getProperty("bucketName"), "Step4Output-BuildDistancesVectors/")))) {
+			arff.lines().forEach(new Consumer<String>() {
+				final double[] vector24D = new double[25];
+				boolean isEven = false;
+				String wordPair = "";
+				boolean isWordPairSimilar;
+
+				@Override
+				public void accept(String line) {
+					if (!isEven) {
+						wordPair = line;
+					} else {
+						String[] split = line.split("[,\t]");
+						for (int i = 0; i < split.length - 1; i++) {
+							vector24D[i] = split[i].equals("?") ? Double.NaN : Double.parseDouble(split[i]);
+						}
+						vector24D[vector24D.length - 1] = 0;
+						isWordPairSimilar = Boolean.parseBoolean(split[split.length - 1]);
+
+						String classname = cls.classifiy(cls.createInstance(vector24D), "model.bin");
+						boolean wordPairResultPrediction = Boolean.parseBoolean(classname);
+
+						if (isWordPairSimilar == true && wordPairResultPrediction == false)
+							System.out.println("False Negative:" + wordPair);
+						else if (isWordPairSimilar == false && wordPairResultPrediction == true)
+							System.out.println("False Positive:" + wordPair);
+					}
+					isEven = !isEven;
+				}
+			});
+		}
 	}
 }
