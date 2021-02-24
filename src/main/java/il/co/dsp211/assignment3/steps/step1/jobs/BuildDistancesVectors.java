@@ -93,13 +93,13 @@ public class BuildDistancesVectors
 
 						IntStream.range(0, vector5_word1.length).parallel().forEach(i ->
 						{
-							// Dist - Manhattan - Calc ✓
+							// Dist - Manhattan - Calc
 							sumArrayManhattanTemp[0] += Math.abs(vector5_word1[i].get() - vector5_word2[i].get());
 							sumArrayManhattanTemp[1] += Math.abs(vector6_word1[i].get() - vector6_word2[i].get());
 							sumArrayManhattanTemp[2] += Math.abs(vector7_word1[i].get() - vector7_word2[i].get());
 							sumArrayManhattanTemp[3] += Math.abs(vector8_word1[i].get() - vector8_word2[i].get());
 
-							// Dist - Euclidean - Calc ✓
+							// Dist - Euclidean - Calc
 							sumArrayEuclideanTemp[0] += 1 << Math.abs(vector5_word1[i].get() - vector5_word2[i].get());
 							sumArrayEuclideanTemp[1] += Math.pow(vector6_word1[i].get() - vector6_word2[i].get(), 2);
 							sumArrayEuclideanTemp[2] += Math.pow(vector7_word1[i].get() - vector7_word2[i].get(), 2);
