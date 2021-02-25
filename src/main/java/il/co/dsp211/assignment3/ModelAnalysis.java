@@ -51,7 +51,7 @@ public class ModelAnalysis
 				.region(Region.of(properties.getProperty("region").toLowerCase().replace('_', '-')))
 				.build();
 		     BufferedReader arff = new BufferedReader(new InputStreamReader(loadData(s3Client, properties.getProperty("bucketName"), "Step4Output-BuildDistancesVectors/")));
-		     BufferedWriter writer = new BufferedWriter(new FileWriter("Full_Analysis.txt", true)))
+		     BufferedWriter writer = new BufferedWriter(new FileWriter("MLP_model_Full_Analysis.txt", true)))
 		{
 			arff.lines().forEach(new Consumer<String>()
 			{

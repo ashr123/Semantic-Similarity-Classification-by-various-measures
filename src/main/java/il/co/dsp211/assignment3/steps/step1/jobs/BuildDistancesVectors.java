@@ -34,7 +34,6 @@ public class BuildDistancesVectors
 			}
 		}
 	}
-
 	public static class CreatePairDistancesVectorReducer extends Reducer<StringBooleanPair, StringVectorsQuadruplePair, ArrayWritable, BooleanWritable>
 	{
 		private VectorsQuadruple mainWordVectors;
