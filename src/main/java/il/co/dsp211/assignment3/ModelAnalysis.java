@@ -9,6 +9,9 @@ import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import weka.classifiers.Classifier;
+import weka.core.DenseInstance;
+import weka.core.SerializationHelper;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -52,8 +55,10 @@ public class ModelAnalysis
 		{
 			arff.lines().forEach(new Consumer<String>()
 			{
-				final ModelClassifier cls = new ModelClassifier();
+				final ModelClassifier modelClassifier = new ModelClassifier();
+				final Classifier cls = (Classifier) SerializationHelper.read("model.bin");
 				final double[] vector24D = new double[25];
+				final DenseInstance DENSE_INSTANCE = new DenseInstance(1.0, vector24D);
 				boolean isEven = false;
 				String wordPair;
 
@@ -70,7 +75,10 @@ public class ModelAnalysis
 								.forEach(i -> vector24D[i] = split[i].equals("?") ? Double.NaN : Double.parseDouble(split[i]));
 						final boolean isWordPairSimilar = Boolean.parseBoolean(split[split.length - 1]);
 						vector24D[24] = isWordPairSimilar ? 0 : 1;
-						final boolean wordPairResultPrediction = Boolean.parseBoolean(cls.classifiy(cls.createInstance(vector24D), "model.bin"));
+						try
+						{
+							final boolean wordPairResultPrediction = Boolean.parseBoolean(modelClassifier.classify(cls, DENSE_INSTANCE));
+
 
 						// Uncomment for stdout prints
 //						if (isWordPairSimilar && !wordPairResultPrediction)
@@ -82,8 +90,7 @@ public class ModelAnalysis
 //						else
 //							System.out.println("True Negative:\t" + wordPair);
 
-						try {
-							if (isWordPairSimilar && !wordPairResultPrediction)
+						if (isWordPairSimilar && !wordPairResultPrediction)
 								writer.write("False Negative:\t" + wordPair + "\n");
 							else if (!isWordPairSimilar && wordPairResultPrediction)
 								writer.write("False Positive:\t" + wordPair + "\n");
@@ -91,13 +98,19 @@ public class ModelAnalysis
 								writer.write("True Positive:\t" + wordPair + "\n");
 							else
 								writer.write("True Negative:\t" + wordPair + "\n");
-						} catch (IOException e) {
+						}
+						catch (Exception e)
+						{
 							e.printStackTrace();
 						}
 					}
 					isEven = !isEven;
 				}
 			});
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 
