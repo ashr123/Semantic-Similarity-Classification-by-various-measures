@@ -6,6 +6,7 @@ import il.co.dsp211.assignment3.steps.step1.jobs.CorpusPairFilter;
 import il.co.dsp211.assignment3.steps.step1.jobs.CorpusWordCount;
 import il.co.dsp211.assignment3.steps.utils.*;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -24,7 +25,10 @@ import weka.classifiers.Classifier;
 import weka.core.Debug;
 import weka.core.Instances;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
 
 public class EMR
 {
@@ -96,6 +100,15 @@ public class EMR
 		if (!jobStatus)
 			return;
 
+//		try (FileSystem fileSystem = FileSystem.get(conf);
+//		     BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(fileSystem.open(new Path("features.txt")))))
+//		{
+//			System.out.println("Features:");
+//			bufferedReader.lines()
+//					.map(s -> s.split("\t")[0])
+//					.forEach(System.out::println);
+//		}
+
 		//--------------------------------------------------------------------------------------------------------------
 
 		System.out.println("Building job 3 - BuildCoVectors...");
@@ -106,6 +119,7 @@ public class EMR
 
 		job3.setInputFormatClass(SequenceFileInputFormat.class);
 		job3.setOutputFormatClass(SequenceFileOutputFormat.class);
+//		job3.setNumReduceTasks(1);
 
 		MultipleInputs.addInputPath(job3, corpusPath, SequenceFileInputFormat.class, BuildCoVectors.VectorRecordFilterMapper.class);
 		MultipleInputs.addInputPath(job3, new Path(args[0] + "Step1Output-CorpusWordCount"), SequenceFileInputFormat.class, BuildCoVectors.CounterLittleLMapper.class);
@@ -122,6 +136,7 @@ public class EMR
 		System.out.println("Done building!\n" +
 		                   "Starting job 3 - BuildCoVectors...");
 		System.out.println("Job 3 - BuildCoVectors: completed with success status: " + (jobStatus = job3.waitForCompletion(true)) + "!");
+//		jobStatus = false;
 		if (!jobStatus)
 			return;
 
