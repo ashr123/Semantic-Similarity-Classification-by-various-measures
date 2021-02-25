@@ -226,7 +226,13 @@ F1:                                       95.25645969919012%
 
 ## Analysis
 
-TODO: ...
+Examples of predictions of our classifier model:
+
+* True-Positive Pairs: ⟨, ⟩ , ⟨, ⟩ , ⟨, ⟩
+* True-Negative Pairs: ⟨, ⟩ , ⟨, ⟩ , ⟨, ⟩
+* False-Positive Pairs: ⟨, ⟩ , ⟨, ⟩ , ⟨, ⟩
+* False-Negative Pairs: ⟨televis (preStem: television), polici (preStem: policy)⟩
+
 
 ## Running Instructions
 

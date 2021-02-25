@@ -25,7 +25,6 @@ public class BuildDistancesVectors
 		{
 			context.write(new StringBooleanPair(key.toString(), false), new StringVectorsQuadruplePair("", value));
 
-			// TODO: Check why that's possible
 			if (GoldenStandard.getGoldenStandard(context.getConfiguration()).containsKey(key.toString()))
 			{
 				for (String neighbor : GoldenStandard.getGoldenStandard(context.getConfiguration()).get(key.toString()).keySet())
@@ -35,7 +34,6 @@ public class BuildDistancesVectors
 			}
 		}
 	}
-
 
 	public static class CreatePairDistancesVectorReducer extends Reducer<StringBooleanPair, StringVectorsQuadruplePair, ArrayWritable, BooleanWritable>
 	{
@@ -166,7 +164,6 @@ public class BuildDistancesVectors
 							vector24D[i * 6 + 5] = new DoubleWritable(sumD1Temp[i] + sumD2Temp[i]);
 						});
 
-//						context.write(new Text(next.getKey()), new Text(key.getKey()));
 						context.write(new ArrayWritable(DoubleWritable.class, vector24D),
 								new BooleanWritable(GoldenStandard.getGoldenStandard(context.getConfiguration())
 										.get(next.getKey())

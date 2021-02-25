@@ -47,7 +47,8 @@ public class ModelAnalysis
 		try (S3Client s3Client = S3Client.builder()
 				.region(Region.of(properties.getProperty("region").toLowerCase().replace('_', '-')))
 				.build();
-		     BufferedReader arff = new BufferedReader(new InputStreamReader(loadData(s3Client, properties.getProperty("bucketName"), "Step4Output-BuildDistancesVectors/"))))
+		     BufferedReader arff = new BufferedReader(new InputStreamReader(loadData(s3Client, properties.getProperty("bucketName"), "Step4Output-BuildDistancesVectors/")));
+		     BufferedWriter writer = new BufferedWriter(new FileWriter("Full_Analysis.txt", true)))
 		{
 			arff.lines().forEach(new Consumer<String>()
 			{
@@ -71,10 +72,28 @@ public class ModelAnalysis
 						vector24D[24] = isWordPairSimilar ? 0 : 1;
 						final boolean wordPairResultPrediction = Boolean.parseBoolean(cls.classifiy(cls.createInstance(vector24D), "model.bin"));
 
-						if (isWordPairSimilar && !wordPairResultPrediction)
-							System.out.println("False Negative: " + wordPair);
-						else if (!isWordPairSimilar && wordPairResultPrediction)
-							System.out.println("False Positive: " + wordPair);
+						// Uncomment for stdout prints
+//						if (isWordPairSimilar && !wordPairResultPrediction)
+//							System.out.println("False Negative:\t" + wordPair);
+//						else if (!isWordPairSimilar && wordPairResultPrediction)
+//							System.out.println("False Positive:\t" + wordPair);
+//						else if (isWordPairSimilar && wordPairResultPrediction)
+//							System.out.println("True Positive:\t" + wordPair);
+//						else
+//							System.out.println("True Negative:\t" + wordPair);
+
+						try {
+							if (isWordPairSimilar && !wordPairResultPrediction)
+								writer.write("False Negative:\t" + wordPair + "\n");
+							else if (!isWordPairSimilar && wordPairResultPrediction)
+								writer.write("False Positive:\t" + wordPair + "\n");
+							else if (isWordPairSimilar && wordPairResultPrediction)
+								writer.write("True Positive:\t" + wordPair + "\n");
+							else
+								writer.write("True Negative:\t" + wordPair + "\n");
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
 					}
 					isEven = !isEven;
 				}
