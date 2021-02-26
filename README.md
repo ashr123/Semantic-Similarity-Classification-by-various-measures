@@ -3,7 +3,7 @@
 ## Project by Roy Ash and Amit Binenfeld
 
 This work is a final project in the course 'Distributed System Programming: Scale Out with Cloud Computing and
-Map-Reduce' by Dr. M. Adler in Ben-Gurion University \[Spring 2021\].
+Map-Reduce' by Dr. M. Adler in Ben-Gurion University [Spring 2021].
 
 This work was implemneted using Java, Apache Hadoop, WEKA and Amazon EMR (AWS).
 
@@ -40,7 +40,7 @@ values `count(f)`, `count(l)` and `count(F)` (= `count(L)`) from the paper.
 Mapper input: `⟨LongWritable, Text⟩`\
 Mapper output: `⟨StringStringPair, LongWritable⟩`
 
-The mapper receives line number and text structured like that: head word, \[⟨word, pos tag, dep label, head index⟩\],
+The mapper receives line number and text structured like that: head word, [⟨word, pos tag, dep label, head index⟩],
 total count, counts by year. His output sends bunch of ⟨word, dep label⟩ pairs and the number of their occurences, which
 for now is 1.
 
@@ -193,7 +193,7 @@ Mean absolute error 0.1513\
 Root mean squared error 0.2778\
 Relative absolute error 90.7567%\
 Root relative squared error 96.2734%\
-Total Number of Instances 2772\
+Total Number of Instances 2772
 
 Recall:                                99.24543288324067%\
 Precision:                               91.875%\
@@ -206,32 +206,44 @@ Took about 5 minuts in Amazon EMR with 6 instances of type C5XLarge.
 Evaluation:\
 === Summary ===
 
-Correctly Classified Instances 2477 90.9658%\
-Incorrectly Classified Instances 246 9.0342%\
-Kappa statistic 0.0465\
-K&B Relative Info Score -12.0854%\
-K&B Information Score -145.2159 bits -0.0533 bits/instance\
-Class complexity | order 0 1201.5845 bits 0.4413 bits/instance\
-Class complexity | scheme 1220.2651 bits 0.4481 bits/instance\
-Complexity improvement     (Sf)       -18.6806 bits -0.0069 bits/instance\
-Mean absolute error 0.1541\
-Root mean squared error 0.2868\
-Relative absolute error 92.5798%\
-Root relative squared error 99.4904%\
-Total Number of Instances 2723\
+Correctly Classified Instances        2531               91.3059 %\
+Incorrectly Classified Instances       241                8.6941 %\
+Kappa statistic                          0.1664\
+K&B Relative Info Score                -14.3173 %\
+K&B Information Score                 -175.3782 bits     -0.0633 bits/instance\
+Class complexity | order 0            1224.9355 bits      0.4419 bits/instance\
+Class complexity | scheme             1267.5448 bits      0.4573 bits/instance\
+Complexity improvement     (Sf)        -42.6093 bits     -0.0154 bits/instance\
+Mean absolute error                      0.1504\
+Root mean squared error                  0.2814\
+Relative absolute error                 90.2084 %\
+Root relative squared error             97.5522 %\
+Total Number of Instances             2772
 
-Recall:                                   99.83831851253031%\
-Precision:                             91.07669616519174%\
-F1:                                       95.25645969919012%
+Recall:	            99.4042891183479%\
+Precision:	        91.71857823378526%\
+F1:	                95.4068991804841%
 
 ## Analysis
 
 Examples of predictions of our classifier model:
 
-* True-Positive Pairs: ⟨, ⟩ , ⟨, ⟩ , ⟨, ⟩
-* True-Negative Pairs: ⟨, ⟩ , ⟨, ⟩ , ⟨, ⟩
-* False-Positive Pairs: ⟨, ⟩ , ⟨, ⟩ , ⟨, ⟩
-* False-Negative Pairs: ⟨televis (preStem: television), polici (preStem: policy)⟩
+* True-Positive Pairs:
+  * ⟨dove, anim (Pre Stemming: animal)⟩
+  * ⟨pistol, object⟩
+  * ⟨banana, food⟩
+* True-Negative Pairs:
+  * ⟨appl (Pre Stemming: apple), pineappl (Pre Stemming: pineapple)⟩
+  * ⟨jacket, shirt⟩
+  * ⟨toaster, stereo⟩
+* False-Positive Pairs:
+  * ⟨sword, anim (Pre Stemming: animal)⟩
+  * ⟨yacht, anim (Pre Stemming: animal)⟩
+  * ⟨helicopt (Pre Stemming: helicopter), nation⟩
+* False-Negative Pairs:
+  * ⟨carrot, food⟩
+  * ⟨wardrob (Pre Stemming: wardrobe), furnitur (Pre Stemming: furniture)⟩
+  * ⟨jet, transport⟩
 
 
 ## Running Instructions

@@ -187,7 +187,7 @@ public class EMR
 			int trainSize = (int) Math.round(dataset.numInstances() * 0.8);
 			int testSize = dataset.numInstances() - trainSize;
 
-			dataset.randomize(new Debug.Random(1));// if you comment this line the accuracy of the model will be dropped from 96.6% to 80%
+			dataset.randomize(new Debug.Random());// if you comment this line the accuracy of the model will be dropped from 96.6% to 80%
 
 			Instances traindataset = new Instances(dataset, 0, trainSize);
 			Instances testdataset = new Instances(dataset, trainSize, testSize);
