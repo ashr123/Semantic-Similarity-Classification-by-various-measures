@@ -176,7 +176,7 @@ Training model with MLP and calculating precision, recall and F1 metrics.
 
 ### For 15/99 parts of the corpus (that have been uploaded to S3)
 
-Took about 32 minuts in Amazon EMR with 6 instances of type C5XLarge.
+Took about 32 minutes in Amazon EMR with 6 instances of type C5XLarge.
 
 Evaluation:\
 === Summary ===
