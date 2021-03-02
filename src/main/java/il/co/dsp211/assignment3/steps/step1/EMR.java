@@ -6,7 +6,6 @@ import il.co.dsp211.assignment3.steps.step1.jobs.CorpusPairFilter;
 import il.co.dsp211.assignment3.steps.step1.jobs.CorpusWordCount;
 import il.co.dsp211.assignment3.steps.utils.*;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BooleanWritable;
 import org.apache.hadoop.io.LongWritable;
@@ -25,10 +24,7 @@ import weka.classifiers.Classifier;
 import weka.core.Debug;
 import weka.core.Instances;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.stream.Collectors;
 
 public class EMR
 {
@@ -50,9 +46,9 @@ public class EMR
 		job1.setMapOutputKeyClass(StringStringPair.class);
 		job1.setMapOutputValueClass(LongWritable.class);
 
-		job1.setCombinerClass(CorpusWordCount.PairSummerCombinerAndReducer.class);
+		job1.setCombinerClass(CorpusWordCount.PairSummerCombiner.class);
 
-		job1.setReducerClass(CorpusWordCount.PairSummerCombinerAndReducer.class);
+		job1.setReducerClass(CorpusWordCount.PairSummerReducer.class);
 		job1.setOutputKeyClass(StringStringPair.class);
 		job1.setOutputValueClass(LongWritable.class);
 

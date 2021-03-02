@@ -40,7 +40,21 @@ public class CorpusWordCount
 		}
 	}
 
-	public static class PairSummerCombinerAndReducer extends Reducer<StringStringPair, LongWritable, StringStringPair, LongWritable>
+	public static class PairSummerCombiner extends Reducer<StringStringPair, LongWritable, StringStringPair, LongWritable>
+	{
+		/**
+		 * @param key     ⟨⟨word, dep label⟩ | ⟨word, "Count_L_Label"⟩,
+		 * @param values  [1]⟩
+		 * @param context ⟨⟨word, dep label⟩, partial sum⟩
+		 */
+		@Override
+		protected void reduce(StringStringPair key, Iterable<LongWritable> values, Context context) throws IOException, InterruptedException
+		{
+			context.write(key, new LongWritable(StreamSupport.stream(values.spliterator(), false).count()));
+		}
+	}
+
+	public static class PairSummerReducer extends Reducer<StringStringPair, LongWritable, StringStringPair, LongWritable>
 	{
 		private Counter counter;
 
@@ -51,8 +65,8 @@ public class CorpusWordCount
 		}
 
 		/**
-		 * @param key     ⟨⟨word, dep label⟩,
-		 * @param values  for combiner: [1], for reducer: [number]⟩
+		 * @param key     ⟨⟨word, dep label⟩ | ⟨word, "Count_L_Label"⟩,
+		 * @param values  [number]⟩
 		 * @param context ⟨⟨word, dep label⟩, sum⟩
 		 */
 		@Override
