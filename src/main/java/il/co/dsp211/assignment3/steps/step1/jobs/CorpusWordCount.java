@@ -27,8 +27,7 @@ public class CorpusWordCount
 		@Override
 		protected void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException
 		{
-			final String[] tokens = value.toString().split("\t")[1].split(" ");
-			for (String tokensSplit : tokens)
+			for (String tokensSplit : value.toString().split("\t")[1].split(" "))
 			{
 				final String[] token = tokensSplit.split("/");
 				if (token.length != 4)
