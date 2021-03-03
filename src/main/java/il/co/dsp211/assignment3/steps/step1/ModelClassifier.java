@@ -1,12 +1,10 @@
 package il.co.dsp211.assignment3.steps.step1;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.functions.MultilayerPerceptron;
-import weka.core.*;
+import weka.core.DenseInstance;
+import weka.core.Instance;
 
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class ModelClassifier
 {

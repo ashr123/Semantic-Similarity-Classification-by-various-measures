@@ -176,53 +176,59 @@ Training model with MLP and calculating precision, recall and F1 metrics.
 
 ### For 15/99 parts of the corpus (that have been uploaded to S3)
 
-Took about 32 minutes in Amazon EMR with 6 instances of type C5XLarge.
+Took about 33 minutes in Amazon EMR with 6 instances of type C5XLarge.
 
-Evaluation:\
-=== Summary ===
+**Evaluation:**\
+**=== Summary ===**
 
-Correctly Classified Instances 2532 91.342%\
-Incorrectly Classified Instances 240 8.658%\
-Kappa statistic 0.1905\
-K&B Relative Info Score -6.7678%\
-K&B Information Score -82.9008 bits -0.0299 bits/instance\
-Class complexity | order 0 1224.9355 bits 0.4419 bits/instance\
-Class complexity | scheme 1208.3778 bits 0.4359 bits/instance\
-Complexity improvement     (Sf)        16.5577 bits 0.006 bits/instance\
-Mean absolute error 0.1513\
-Root mean squared error 0.2778\
-Relative absolute error 90.7567%\
-Root relative squared error 96.2734%\
-Total Number of Instances 2772
+Correctly Classified Instances        2475               89.2857 %\
+Incorrectly Classified Instances       297               10.7143 %\
+Kappa statistic                          0.0282\
+K&B Relative Info Score                -18.2087 %\
+K&B Information Score                 -245.7164 bits     -0.0886 bits/instance\
+Class complexity | order 0            1349.4445 bits      0.4868 bits/instance\
+Class complexity | scheme             1351.6646 bits      0.4876 bits/instance\
+Complexity improvement     (Sf)         -2.2201 bits     -0.0008 bits/instance\
+Mean absolute error                      0.1795\
+Root mean squared error                  0.3067\
+Relative absolute error                 94.8381 %\
+Root relative squared error             99.7635 %\
+Total Number of Instances             2772
 
-Recall:                                99.24543288324067%\
-Precision:                               91.875%\
-F1:                                       95.41809851088201%
+**=== Detailed Accuracy By Class ===**
+
+|                   | TP Rate | FP Rate | Precision | Recall | F-Measure | MCC   | ROC Area | PRC Area | Class |
+|-------------------|---------|---------|-----------|--------|-----------|-------|----------|----------|-------|
+|                   | 0.02    | 0.004   | 0.375     | 0.02   | 0.039     | 0.067 | 0.597    | 0.168    | true  |
+|                   | 0.996   | 0.98    | 0.896     | 0.996  | 0.943     | 0.067 | 0.597    | 0.92     | false |
+| **Weighted Avg.** | 0.893   | 0.876   | 0.841     | 0.893  | 0.848     | 0.067 | 0.597    | 0.84     |       |
 
 ### For only 1 part
 
 Took about 5 minutes in Amazon EMR with 6 instances of type C5XLarge.
 
-Evaluation:\
-=== Summary ===
+**Evaluation:**\
+**=== Summary ===**
 
-Correctly Classified Instances        2531               91.3059 %\
-Incorrectly Classified Instances       241                8.6941 %\
-Kappa statistic                          0.1664\
-K&B Relative Info Score                -14.3173 %\
-K&B Information Score                 -175.3782 bits     -0.0633 bits/instance\
-Class complexity | order 0            1224.9355 bits      0.4419 bits/instance\
-Class complexity | scheme             1267.5448 bits      0.4573 bits/instance\
-Complexity improvement     (Sf)        -42.6093 bits     -0.0154 bits/instance\
-Mean absolute error                      0.1504\
-Root mean squared error                  0.2814\
-Relative absolute error                 90.2084 %\
-Root relative squared error             97.5522 %\
-Total Number of Instances             2772
+Correctly Classified Instances        2470               90.7088 %\
+Incorrectly Classified Instances       253                9.2912 %\
+Kappa statistic                          0.0278\
+K&B Relative Info Score                -20.3396 %\
+K&B Information Score                 -249.7486 bits     -0.0917 bits/instance\
+Class complexity | order 0            1227.8909 bits      0.4509 bits/instance\
+Class complexity | scheme             1230.0967 bits      0.4517 bits/instance\
+Complexity improvement     (Sf)         -2.2058 bits     -0.0008 bits/instance\
+Mean absolute error                      0.1636\
+Root mean squared error                  0.29\
+Relative absolute error                 95.5628 %\
+Root relative squared error             99.1959 %\
+Total Number of Instances             2723
 
-Recall:	            99.4042891183479%\
-Precision:	        91.71857823378526%\
-F1:	                95.4068991804841%
+|                   | TP Rate | FP Rate | Precision | Recall | F-Measure | MCC   | ROC Area | PRC Area | Class |
+|-------------------|---------|---------|-----------|--------|-----------|-------|----------|----------|-------|
+|                   | 0.016   | 0       | 1         | 0.016  | 0.031     | 0.119 | 0.583    | 0.139    | true  |
+|                   | 1       | 0.984   | 0.907     | 1      | 0.951     | 0.119 | 0.583    | 0.926    | false |
+| **Weighted Avg.** | 0.907   | 0.892   | 0.916     | 0.907  | 0.864     | 0.119 | 0.583    | 0.852    |       |
 
 ## Analysis
 

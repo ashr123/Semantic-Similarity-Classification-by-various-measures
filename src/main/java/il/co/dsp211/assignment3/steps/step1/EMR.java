@@ -53,6 +53,7 @@ public class EMR
 		job1.setOutputValueClass(LongWritable.class);
 
 		final Path corpusPath = new Path("s3://assignment3dsp/biarcs" + (Boolean.parseBoolean(args[1]) ? "/biarcs.00-of-99" : ""));
+		System.out.println("Corpus path: " + corpusPath);
 		FileInputFormat.addInputPath(job1, corpusPath);
 		FileOutputFormat.setOutputPath(job1, new Path(args[0] + "Step1Output-CorpusWordCount"));
 
@@ -180,8 +181,9 @@ public class EMR
 			Instances dataset = mg.loadDataset(arff);
 
 			// divide dataset to train dataset 80% and test dataset 20%
-			int trainSize = (int) Math.round(dataset.numInstances() * 0.8);
-			int testSize = dataset.numInstances() - trainSize;
+			final int
+					trainSize = (int) Math.round(dataset.numInstances() * 0.8),
+					testSize = dataset.numInstances() - trainSize;
 
 			dataset.randomize(new Debug.Random());// if you comment this line the accuracy of the model will be dropped from 96.6% to 80%
 
@@ -192,8 +194,7 @@ public class EMR
 			Classifier ann = mg.buildClassifier(traindataset);
 
 			// Evaluate classifier with test dataset
-			String evalsummary = mg.evaluateModel(ann, traindataset, testdataset);
-			System.out.println("Evaluation:\n" + evalsummary);
+			System.out.println("Evaluation:\n" + mg.evaluateModel(ann, traindataset, testdataset));
 
 			//Save model
 			s3Client.putObject(PutObjectRequest.builder()

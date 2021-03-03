@@ -1,17 +1,13 @@
 package il.co.dsp211.assignment3.steps.step1;
 
-import software.amazon.awssdk.services.s3.S3Client;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.functions.MultilayerPerceptron;
 import weka.core.Instances;
-import weka.core.SerializationHelper;
 import weka.core.converters.ConverterUtils.DataSource;
 
 import java.io.InputStream;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 public class ModelGenerator
@@ -29,54 +25,24 @@ public class ModelGenerator
 
 	private Instances getInstances(Instances read)
 	{
-		try
-		{
-			if (read.classIndex() == -1)
-			{
-				read.setClassIndex(read.numAttributes() - 1);
-			}
-		}
-		catch (Exception ex)
-		{
-			Logger.getLogger(ModelGenerator.class.getName()).log(Level.SEVERE, null, ex);
-		}
-
+		read.setClassIndex(read.numAttributes() - 1);
 		return read;
 	}
 
-	public Classifier buildClassifier(Instances traindataset)
+	public Classifier buildClassifier(Instances traindataset) throws Exception
 	{
-		MultilayerPerceptron m = new MultilayerPerceptron();
-
-		try
-		{
-			m.buildClassifier(traindataset);
-		}
-		catch (Exception ex)
-		{
-			Logger.getLogger(ModelGenerator.class.getName()).log(Level.SEVERE, null, ex);
-		}
+		final MultilayerPerceptron m = new MultilayerPerceptron();
+		m.buildClassifier(traindataset);
 		return m;
 	}
 
-	public String evaluateModel(Classifier model, Instances traindataset, Instances testdataset)
+	public String evaluateModel(Classifier model, Instances traindataset, Instances testdataset) throws Exception
 	{
-		Evaluation eval = null;
-		try
-		{
-			// Evaluate classifier with test dataset
-			eval = new Evaluation(traindataset);
+		final Evaluation eval = new Evaluation(traindataset);
 
-			eval.crossValidateModel(model, testdataset, 10, new Random());
-		}
-		catch (Exception ex)
-		{
-			Logger.getLogger(ModelGenerator.class.getName()).log(Level.SEVERE, null, ex);
-		}
+		eval.crossValidateModel(model, testdataset, 10, new Random());
 		return new StringBuilder(eval.toSummaryString(true)).append('\n')
-				.append("Recall:\t").append(eval.recall(1)).append('\n')
-				.append("Precision:\t").append(eval.precision(1)).append('\n')
-				.append("F1:\t").append(eval.fMeasure(1)).append('\n')
+				.append(eval.toClassDetailsString())
 				.toString();
 	}
 
